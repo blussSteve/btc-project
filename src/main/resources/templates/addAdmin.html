@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="/admin/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="/admin/css/style.css" />
+    <script type="text/javascript" src="/admin/js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="/admin/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/admin/layer/layer.js"></script>
+</head>
+<body>
+<table class="table table-bordered table-hover definewidth m10">
+    <tr>
+        <td width="10%" class="tableleft">用户名</td>
+        <td><input type="text" id="userName" name="userName"/></td>  
+    </tr>
+    <tr>
+        <td class="tableleft">密码</td>
+        <td><input type="password" id="password" name="password"/></td>
+    </tr>  
+    <tr>
+        <td class="tableleft">确认密码</td>
+        <td><input type="password" id="surePassword" name="surePassword"/></td>
+    </tr> 
+    <tr>
+        <td width="10%" class="tableleft">手机号</td>
+        <td><input type="text" id="mobile" name="mobile"/></td>
+    </tr> 
+    <tr>
+        <td width="10%" class="tableleft">真实姓名</td>
+        <td><input type="text" id="realName" name="realName"/></td>
+    </tr> 
+    <tr>
+        <td class="tableleft">状态</td>
+        <td>
+            <input type="radio" id="status" name="status" value="0" checked="checked" /> 启用
+            <input type="radio" id="status" name="status" value="1"/> 禁用
+        </td>
+    </tr>
+    <tr>
+        <td class="tableleft"></td>
+        <td>
+            <button class="btn btn-primary" onclick="sumbit()" type="button">保存</button>&nbsp;&nbsp;<button type="button" class="btn btn-success" onclick="returnWindow()" name="backid" id="backid">返回列表</button>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
+<script>
+    function returnWindow(){
+    	window.location.href="/admin/adminPage";
+    }
+    function sumbit(){
+    	var userName=$("#userName").val();
+    	var password=$("#password").val();
+    	var surePassword=$("#surePassword").val();
+    	var mobile=$("#mobile").val();
+    	var realName=$("#realName").val();  
+    	var status=$("#status").val();
+    	if(userName==''){
+    		alert("用户名不能为空");
+    		return;
+    	}
+		if(password==''){
+			alert("密码不能为空");
+    		return;	
+		}
+		if(surePassword==''){
+			alert("确认密码不能为空");
+    		return;
+		}
+		if(mobile==''){
+			alert("手机号不能为空");
+    		return;
+		}
+		if(realName==''){
+			alert("真实姓名不能为空");
+    		return;	
+		}
+		if(password==surePassword){
+			$.ajax({
+				type: "post",
+				dataType: "json", 
+				url: "/admin/addAdmin",
+				data:{userName:userName,password:password,mobile:mobile,realName:realName,status:status}, 
+				success : function(data) {
+					if(data.code!='0000'){
+						alert(data.msg);
+						return ;
+					}else{
+						alert("操作成功");
+						window.location.href="/admin/adminPage";
+					}
+				}
+			});
+		}else{
+			alert("两次输入密码不一致");
+		}
+    	
+    }
+</script>

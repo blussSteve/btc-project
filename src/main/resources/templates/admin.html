@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="UTF-8"/>
+		<title></title>
+		<link rel="stylesheet" href="/admin/dist/bootstrap-3.3.7/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/admin/ztree/css/zTreeStyle/zTreeStyle.css" />
+		<link rel="stylesheet" href="/admin/dist/bootstrap-table/bootstrap-table.min.css" />
+		<link rel="stylesheet" href="/admin/dist/font-awesome-4.7.0/css/font-awesome.min.css"/>
+		<link rel="stylesheet" href="/admin/dist/bootstrapvalidator/css/bootstrapValidator.min.css" />
+		<link rel="stylesheet" href="/admin/css/style.css" />
+		<script type="text/javascript" src="/admin/js/jquery-2.1.4.min.js"></script>
+		<script type="text/javascript" src="/admin/dist/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/admin/dist/bootstrap-table/bootstrap-table.min.js"></script>
+		<script type="text/javascript" src="/admin/dist/bootstrap-table/locale/bootstrap-table-zh-CN.js"></script>
+		<script type="text/javascript" src="/admin/dist/bootstrapvalidator/js/bootstrapValidator.min.js"></script>
+		<script type="text/javascript" src="/admin/ztree/js/jquery.ztree.core.js"></script>
+		<script type="text/javascript" src="/admin/ztree/js/jquery.ztree.excheck.js"></script>
+		<script src="/admin/js/common.js"></script>
+	</head>
+	<style>
+		.panel-heading {
+			padding: 5px 10px;
+		}
+		
+		.panel-heading i {
+			padding-left: 5px;
+		}
+		
+		.form-inline .form-group {
+			padding: 10px 15px;
+		}
+		
+		.form-inline .form-group label {
+			padding-right: 15px;
+		}
+		
+		#table tr:nth-child(even) {
+			background: #f4f8fb;
+		}
+	</style>
+
+	<body>
+		<div class="container-fluid">
+
+			<div class="panel panel-info panel-default">
+				<div class="panel-heading">
+					<div class="panel-title">
+						<div class="row">
+							<div class="col-xs-5 col-md-4 text-left h5">
+								<i class="fa fa-tag">&nbsp;&nbsp;信息查询</i>
+							</div>
+							<div class="col-xs-7 col-md-8 text-right h5">
+								<i class="fa fa-plus-square-o" id="data-add">&nbsp;&nbsp;<a href="javascript:void(0)">新增</a></i>
+								<i class="fa fa-search" id="data-search">&nbsp;&nbsp;<a href="javascript:void(0)">查询</a></i>
+								<a class="fa fa-angle-down" id="data-search-arrow" href="javascript:void(0)"></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="data-search-panel" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="data-search-panel">
+					<div class="panel-body">
+						<form class="form-inline">
+							<div class="form-group">
+								<label for="id">用户id</label>
+								<input type="text" onkeyup="value=value.replace(/^(0+)|[^\d]+/g,'')" class="form-control" id="search-userId" placeholder="用户id">
+							</div>
+							<div class="form-group">
+								<label for="mobile">手机号</label>
+								<input type="text" onkeyup="value=value.replace(/^(0+)|[^\d]+/g,'')" class="form-control" id="search-mobile" placeholder="手机号" maxlength="11">
+							</div>
+							<div class="form-group">
+								<label for="mobile">状态</label>
+								<select class="form-control" id="search-isLocked" style="width: 100px;">
+									<option value="0">启用</option>
+									<option value="1">禁用</option>
+									<option value="2" selected="selected">全部</option>
+								</select>
+							</div>
+						</form>
+
+					</div>
+
+				</div>
+			</div>
+			<div class="body-table">
+				<table id="table"></table>
+			</div>
+
+			<div class="modal fade" tabindex="-1" role="dialog" id="data-modal" data-backdrop="static">
+				<div class="modal-dialog" role="document" aria-hidden="true" style="width:500px">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">操作</h4>
+						</div>
+						<div class="modal-body">
+							<form class="form-horizontal" id="validate-user-form">
+								<input type="hidden" name="id" class="form-control">
+								<div class="form-group">
+									<label for="userName" class="col-sm-3 control-label">用户名</label>
+									<div class="col-sm-8">
+										<input type="text" name="userName" class="form-control" placeholder="用户">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="mobile" class="col-sm-3 control-label">手机号</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" name="mobile" placeholder="手机号" maxlength="11">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="password" class="col-sm-3 control-label">密码</label>
+									<div class="col-sm-8">
+										<input type="password" class="form-control" name="password" placeholder="密码" maxlength="20">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="rePassword" class="col-sm-3 control-label">重复密码</label>
+									<div class="col-sm-8">
+										<input type="password" class="form-control" name="rePassword" placeholder="重复密码" maxlength="20">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="fullname" class="col-sm-3 control-label">姓名</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" name="fullname" placeholder="姓名" maxlength="18">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="level" class="col-sm-3 control-label">级别</label>
+									<div class="col-sm-8">
+										<div class="radio">
+											<label>
+												<input type="radio" name="level" value="2" checked="checked">超级管理员
+											</label>
+										</div>
+										<div class="radio">
+											<label>
+												<input type="radio" name="level" value="1">普通管理员
+											</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="fullname" class="col-sm-3 control-label">状态</label>
+									<div class="col-sm-8">
+										<div class="radio">
+											<label>
+												<input type="radio" name="isLocked" value="0" checked="checked">启用
+											</label>
+										</div>
+										<div class="radio">
+											<label>
+												<input type="radio" name="isLocked" value="1">禁用
+											</label>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info" id="save-data">确定</button>
+							<button type="button" class="btn btn-info" id="close-modal">取消</button>
+						</div>
+					</div>
+					<!-- /.modal-content -->
+				</div>
+				<!-- /.modal-dialog -->
+			</div>
+			<!-- /.modal -->
+			
+			<!--权限分配模态-->
+			<div class="modal fade" tabindex="-1" role="dialog" id="role-modal" data-backdrop="static">
+				<div class="modal-dialog" role="document" aria-hidden="true" style="width:500px">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">操作</h4>
+						</div>
+						<div class="modal-body">
+							<div class="role">
+								<ul id="tree" class="ztree"></ul>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-info" id="save-role">确定</button>
+							<button type="button" class="btn btn-info" id="close-role-modal">取消</button>
+						</div>
+					</div>
+					<!-- /.modal-content -->
+				</div>
+				<!-- /.modal-dialog -->
+			</div>
+			<!-- /.modal -->
+		</div>
+		<input type="hidden" th:value="${session.auth.level}" id="adminLevel"/>
+	</body>
+	<script type="text/javascript">
+		$(function() {
+			var adminLevel = $("#adminLevel").val(); 
+			var $table = $("#table"); //初始化bootstrap-table的内容
+
+			//搜索
+			$("#data-search").click(function() {
+				$table.bootstrapTable('refresh');
+			});
+			//新增
+			$("#data-add").click(function() {
+				$('#data-modal').modal('show');
+				if(adminLevel==1){
+					$("input:radio[name=level][value=2]").attr("disabled",true); 
+					$("input:radio[name=level][value=1]").attr("checked", true);
+				}
+
+			})
+
+			$("#save-data").click(function() {
+				var bootstrapValidator = $("#validate-user-form").data('bootstrapValidator');
+				bootstrapValidator.validate();
+				if(bootstrapValidator.isValid()) {
+
+					var userId = $("#validate-user-form input[name='id']").val();
+
+					var url = '/admin/editMessage';
+					if(null === userId || "" == userId) {
+						url = '/admin/addUser'
+						$("#validate-user-form input[name='id']").val(-1);
+
+					}
+					var form = $("#validate-user-form").serialize();
+					$.ajax({
+						type: 'post',
+						url: url,
+						cache: false,
+						data: form,
+						dataType: 'json',
+						success: function(data) {
+							if("0000" == data.code) {
+								alert("成功");
+								//关闭模态框
+								$("#validate-user-form").data('bootstrapValidator').destroy();
+								$('#validate-user-form').data('bootstrapValidator', null);
+								formValidator();
+								$("#validate-user-form input").val("");
+								$('#data-modal').modal('hide');
+								//刷新数据
+								$table.bootstrapTable('refresh');
+							} else {
+								alert(data.msg);
+							}
+
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+
+				} else {
+					alert("失败")
+				}
+			})
+			$("#close-modal").click(function() {
+				//移除上一次的校验结果，重新添加表单校验。
+				$("#validate-user-form").data('bootstrapValidator').destroy();
+				$("#validate-user-form").data('bootstrapValidator', null);
+				formValidator();
+				$("#validate-user-form input").val("");
+				$('#data-modal').modal('hide');
+			})
+
+			function operateFormatter(value, row, index) {
+				if(adminLevel>=row.level) {
+					return [
+						'<a class="setRole" href="javascript:void(0)" title="授权">',
+						'<i class="fa fa-group">&nbsp;授权&nbsp;&nbsp;&nbsp;</i>',
+						'</a>',
+						'<a class="modify" href="javascript:void(0)" title="编辑">',
+						'<i class="fa fa-edit">&nbsp;编辑</i>',
+						'</a>'
+					].join('')
+				}
+				return '';
+
+			}
+
+			function statusFormatter(vlue, row, index) {
+
+				var str = "启用";
+				if(row.isLocked == '1') {
+					str = "禁用"
+				}
+				
+				if(adminLevel>=row.level) {
+					return [
+							'<a href="javascript:void(0)" class="status">' + str + '</a>'
+						].join('')
+						
+				}else{
+					return [
+							 str
+						].join('')
+				}
+				return '';
+
+			}
+			window.statusEnvents = {
+				'click .status': function(e, value, row, index) {
+					var isLock = 1;
+					var userId = row.id;
+					if(1 == row.isLocked) {
+						isLock = 0;
+					}
+					$.ajax({
+						type: 'post',
+						url: '/admin/setUserIsLock',
+						cache: false,
+						data: {
+							isLock: isLock,
+							userId: userId
+						},
+						dataType: 'json',
+						success: function(data) {
+							$table.bootstrapTable('refresh');
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+				}
+			}
+			window.operateEvents = {
+				'click .modify': function(e, value, row, index) {
+					$("#data-modal").modal("show");
+
+					$("#validate-user-form").bootstrapValidator('removeField', 'password');
+					$("#validate-user-form").bootstrapValidator('removeField', 'rePassword');
+
+					//表单赋值
+					$("#validate-user-form input[name='userName']").val(row.userName);
+					$("#validate-user-form input[name='mobile']").val(row.mobile);
+					$("#validate-user-form input[name='fullname']").val(row.fullname);
+
+					if(row.isLocked == '1') {
+						$("input:radio[name=isLocked][value=1]").attr("checked", true);
+					} else {
+						$("input:radio[name=isLocked][value=0]").attr("checked", true);
+					}
+					
+					if(adminLevel==1){
+						$("input:radio[name=level][value=2]").attr("disabled",true); 
+						$("input:radio[name=level][value=1]").attr("checked", true);
+					}
+					
+					if(row.level == '1') {
+						$("input:radio[name=level][value=1]").attr("checked", true);
+					} 
+					if(row.level == '2') {
+						$("input:radio[name=level][value=2]").attr("checked", true);
+					}
+
+					$("#validate-user-form input[name='id']").val(row.id);
+
+				},
+				"click .setRole": function(e, value, row, index) {
+					
+					initTree(row.id);
+					$('#role-modal').modal('show');
+
+				}
+			}
+
+			function InitMainTable() {
+				//记录页面bootstrap-table全局变量$table，方便应用
+				$table.bootstrapTable('destroy').bootstrapTable({
+					url: '/admin/userList?rnd=' + Math.random(), //请求后台的URL（*）
+					method: 'post', //请求方式（*）
+					dataType: "json",
+					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+					//					toolbar: '#toolbar', //工具按钮用哪个容器
+					striped: false, //是否显示行间隔色
+					cache: false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+					pagination: true, //是否显示分页（*）
+					sortable: true, //是否启用排序
+					sortOrder: "asc", //排序方式
+					sidePagination: "server", //分页方式：client客户端分页，server服务端分页（*）
+					pageNumber: 1, //初始化加载第一页，默认第一页,并记录
+					pageSize: 10, //每页的记录行数（*）
+					pageList: [10, 20, 50, 100], //可供选择的每页的行数（*）
+					search: false, //是否显示表格搜索
+					strictSearch: true,
+					showColumns: true, //是否显示所有的列（选择显示的列）
+					showRefresh: true, //是否显示刷新按钮
+					showFullscreen: true,
+					minimumCountColumns: 2, //最少允许的列数
+					clickToSelect: true, //是否启用点击选中行
+					//height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+					uniqueId: "id", //每一行的唯一标识，一般为主键列
+					showToggle: true, //是否显示详细视图和列表视图的切换按钮
+					cardView: false, //是否显示详细视图
+					detailView: false, //是否显示父子表
+					singleSelect: true, //是否单选
+					showExport: true,
+					//得到查询的参数
+					queryParams: function(params) {
+						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+						var temp = {
+							pageSize: params.limit, //页面大小
+							pageNo: (params.offset / params.limit) + 1, //页码
+							orderBy: params.sort, //排序列名  
+							order: params.order, //排位命令（desc，asc）
+							userId: $("#search-userId").val(),
+							mobile: $("#search-mobile").val(),
+							status: $("#search-isLocked").val()
+						};
+						return temp;
+					},
+					columns: [{
+						checkbox: true,
+						visible: true //是否显示复选框  
+					},{
+						field: 'id',
+						title: 'id',
+						sortable: true,
+					}, {
+						field: 'userName',
+						title: '账号',
+					}, {
+						field: 'mobile',
+						title: '手机号',
+					}, {
+						field: 'fullname',
+						title: '姓名',
+					}, {
+						title: '状态',
+						align: 'center',
+						events: window.statusEnvents,
+						formatter: statusFormatter
+					}, {
+						title: '操作',
+						align: 'center',
+						events: window.operateEvents,
+						formatter: operateFormatter
+					}],
+					onLoadSuccess: function(data) {
+						console.log("加载成功");
+					},
+					onLoadError: function() {
+						console.log("加载失败")
+					},
+					onDblClickRow: function(row, $element) {},
+				});
+			};
+			InitMainTable();
+
+			//表单验证
+			formValidator();
+
+			function formValidator() {
+				$("#validate-user-form").bootstrapValidator({
+					message: 'This value is not valid',
+					feedbackIcons: {
+						valid: 'glyphicon glyphicon-ok',
+						invalid: 'glyphicon glyphicon-remove',
+						validating: 'glyphicon glyphicon-refresh'
+					},
+					fields: {
+						userName: {
+							message: '用户名验证失败',
+							validators: {
+								notEmpty: {
+									message: '用户名不能为空'
+								},
+								stringLength: {
+									min: 6,
+									max: 18,
+									message: '用户名长度必须在6到18位之间'
+								},
+								regexp: {
+									regexp: /^[a-zA-Z0-9_]+$/,
+									message: '用户名只能包含大写、小写、数字和下划线'
+								}
+							}
+						},
+						mobile: {
+							message: '手机号验证失败',
+							validators: {
+								notEmpty: {
+									message: '手机号不能为空'
+								},
+								regexp: {
+									regexp: /^1\d{10}$/,
+									message: '手机号码格式错误'
+								}
+							}
+						},
+						password: {
+							message: '',
+							validators: {
+								notEmpty: {
+									message: '密码不能为空'
+								},
+								regexp: {
+									regexp: /^[0-9a-zA-Z]{6,20}$/,
+									message: '密码必须是6-20位英文和数字'
+								}
+							}
+						},
+						rePassword: {
+							message: '',
+							validators: {
+								notEmpty: {
+									message: '密码不能为空'
+								},
+								stringLength: {
+									min: 6,
+									max: 20,
+									message: '密码长度必须在6-20位'
+								},
+								identical: {
+									field: 'password',
+									message: '密码不一致'
+								},
+								different: {
+									field: 'userName',
+									message: '密码和手机号不能相同'
+								},
+								regexp: {
+									regexp: /^[0-9a-zA-Z]{6,20}$/,
+									message: '密码必须是6-20位英文和数字'
+								}
+							}
+						},
+						fullName: {
+							message: '姓名验证失败',
+							validators: {
+								notEmpty: {
+									message: '姓名不能为空'
+								},
+								stringLength: {
+									min: 2,
+									max: 10,
+									message: '姓名长度必须在2到18位之间'
+								}
+							}
+						},
+						isLocked: {
+							message: '验证失败',
+							validators: {
+								notEmpty: {
+									message: '状态不能为空'
+								}
+							}
+						},
+						level: {
+							message: '管理员级别验证失败',
+							validators: {
+								notEmpty: {
+									message: '管理员级别不能为空'
+								}
+							}
+						},
+					}
+				}).on('success.form.bv', function(e) {
+					// 阻止默认事件提交
+					e.preventDefault();
+				});
+			}
+			
+			//权限设置
+			
+			function initTree(userId){
+				var nodes = new Array();
+					$.ajax({
+						type: "post",
+						dataType: "json",
+						url: "/admin/getUserRole",
+						async: false, //取消异步请求
+						data: {
+							userId: userId
+						},
+						success: function(result) {
+							if(result.code != '0000') {
+								alert(result.msg);
+								return;
+							}
+							var data = result.data;
+							$.each(data, function(i, n) {
+								var node = new Object();
+								node.id = n.id;
+								node.pId = n.pid;
+								node.name = n.name;
+								if(n.isCheck == 1) {
+									node.checked = true;
+								}
+								nodes.push(node);
+
+							});
+
+							var setting = {
+								check: {
+									enable: true
+								},
+								data: {
+									simpleData: {
+										enable: true
+									}
+								}
+							};
+							var zTreeObj = $.fn.zTree.init($("#tree"), setting, nodes);
+							var nodess = zTreeObj.getCheckedNodes();
+
+							$.each(nodess, function(i, n) {
+								zTreeObj.checkNode(n, true, true);
+							});
+							
+						}
+					});
+
+			}
+
+			$("#save-role").click(function() {
+				var userId= $table.bootstrapTable('getSelections')[0].id;
+				var treeObj = $.fn.zTree.getZTreeObj("tree");
+				var nodes = treeObj.getCheckedNodes(true);
+
+				var listItem = new Array();
+				$.each(nodes, function(i, n) {
+					var item = new Object();
+					if(n.pId !== null) {
+						item.firstItemId = n.pId;
+						item.secondItemId = n.id;
+						item.userId = userId;
+						listItem.push(item);
+					}
+
+				});
+				$.ajax({
+					type: "post",
+					dataType: "json",
+					url: "/admin/setUserRole",
+					data: {
+						userId: userId,
+						listUserRoleStr: JSON.stringify(listItem)
+					},
+					success: function(result) {
+						if(result.code == "0000") {
+							alert("成功");
+							$.fn.zTree.destroy("tree");
+							initTree(userId);
+						}
+					}
+				});
+
+			});
+			$("#close-role-modal").click(function(){
+				$.fn.zTree.destroy("tree");
+				$('#role-modal').modal('hide');
+			})
+
+		})
+	</script>
+
+</html>

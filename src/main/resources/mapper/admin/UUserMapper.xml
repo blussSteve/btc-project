@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.btc.mapper.admin.UUserMapper">
+
+	<!--创建map实体类-->
+	<resultMap id="tableMap" type="com.btc.model.admin.UUser">
+		<result column="id" property="id"/>
+		<result column="user_name" property="userName"/>
+		<result column="password" property="password"/>
+		<result column="is_expired" property="isExpired"/>
+		<result column="is_locked" property="isLocked"/>
+		<result column="is_enable" property="isEnable"/>
+		<result column="mobile" property="mobile"/>
+		<result column="fullname" property="fullname"/>
+		<result column="last_login_time" property="lastLoginTime"/>
+		<result column="login_error_count" property="loginErrorCount"/>
+		<result column="create_time" property="createTime"/>
+		<result column="channel" property="channel"/>
+		<result column="level" property="level"/>
+	</resultMap>
+    <!-- 分页条件-->
+	<sql id="page_sort_condition">
+		 limit #{pageNo},#{pageSize}
+	</sql>
+	<!-- 排序条件-->
+	<sql id="order_by_condition">
+		 <if test="orderBy != '' and  orderBy != null ">
+			 ORDER BY ${orderBy} ${order}
+		 </if>
+	</sql>
+	<sql id="search">
+	     where 1=1
+	     <if test="id !=null and id!=''">
+	     	AND id=#{id}
+	     </if>
+	     <if test="userName !=null and userName!=''">
+	     	ADN user_name like '%${userName}%'
+	     </if>
+	     <if test="mobile !=null and mobile!=''">
+	     	AND mobile like '%${mobile}%'
+	     </if>
+	     <if test="isLocked !=2">
+	     	AND is_locked =#{isLocked}
+	     </if>
+	     AND level!=3
+	</sql>
+	<select id="listAdmin" resultMap="tableMap">
+		 SELECT id,user_name,PASSWORD,is_expired,is_locked,mobile,fullname,last_login_time,create_time,level FROM u_user self
+		 <include refid="search"></include>
+		 <include refid="order_by_condition"></include>
+		 <include refid="page_sort_condition"></include>
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer">
+		 SELECT count(1) FROM u_user self
+		 <include refid="search"></include>
+	</select>
+</mapper>
