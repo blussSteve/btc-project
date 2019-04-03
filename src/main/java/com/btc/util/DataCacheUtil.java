@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
-import com.btc.pojo.UserInfo;
+import com.btc.lbank.bean.LbankToken;
+import com.btc.model.UserInfo;
 import com.btc.service.RedisService;
 
 @Component 
@@ -27,8 +28,8 @@ public class DataCacheUtil {
 	 * @param userId
 	 * @return
 	 */
-	public static UserInfo getUserInfo(long userId){
-		String str=instance.redisService.hget(Constants.USER_CACHE+userId, "userInfo");
+	public static UserInfo getUserInfo(String token){
+		String str=instance.redisService.get(Constants.USER_TOKEN_CACHE+token);
 		 
 		if(StringUtils.isNotEmpty(str)){
 			UserInfo vo=JSONObject.parseObject(str,UserInfo.class);
@@ -36,6 +37,22 @@ public class DataCacheUtil {
 		}
 		return null;
 	}
+	
+	/**
+	 * 获取token
+	 * @param openId
+	 * @return
+	 */
+	public static LbankToken getLbankToken(String openId){
+		String str=instance.redisService.get(Constants.LBANK_TOKEN_CACHE+openId);
+		 
+		if(StringUtils.isNotEmpty(str)){
+			LbankToken vo=JSONObject.parseObject(str,LbankToken.class);
+			return vo;
+		}
+		return null;
+	}
+	
 	
 	
 }

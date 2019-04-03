@@ -2,6 +2,7 @@ package com.btc.service.impl.admin;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,13 +69,10 @@ public class AdminServiceImpl implements AdminService{
 					HttpSession session=request.getSession();
 					session.setAttribute("userName", admin.getUserName());
 					session.setAttribute("level", admin.getLevel());
-					session.setMaxInactiveInterval(720*60);
-					
 					//配置token
-					String token=TokenUtil.generateToken(new AuthUser((long)admin.getId(), AuthRoleEnum.ADMIN.getRole(), new Timestamp(System.currentTimeMillis())));
+					String token=UUID.randomUUID().toString().replace("-","");
 					session.setAttribute(Constants.AUTH_TOKEN_NAME_DEFAULT, token);
 					session.setAttribute(Constants.AUTH_USER, admin);
-					
 					adminMapper.updateAdminToken(token, admin.getId());
 					return "1";
 				}
@@ -245,6 +243,11 @@ public class AdminServiceImpl implements AdminService{
 		
 		return JsonResultHelp.buildSucc();
 		
+	}
+	
+	public static void main(String[] args) {
+		Integer a=null;
+		System.out.println(a.intValue());
 	}
 
 }

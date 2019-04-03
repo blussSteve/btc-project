@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="/admin/dist/bootstrap-3.3.7/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/admin/dist/daterangepicker/daterangepicker.css" />
+		<link rel="stylesheet" href="/admin/dist/bootstrap-table/bootstrap-table.min.css" />
+		<link rel="stylesheet" href="/admin/dist/font-awesome-4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/style.css" />
+		<script src="/admin/js/jquery-2.1.4.min.js"></script>
+		<script src="/admin/dist/daterangepicker/moment.min.js"></script>
+		<script src="/admin/dist/daterangepicker/daterangepicker.js"></script>
+		<script src="/admin/dist/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/bootstrap-table.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/locale/bootstrap-table-zh-CN.js"></script>
+		<script src="/admin/js/common.js"></script>
+		<script src="/admin/js/moment.js"></script>
+
+	</head>
+	<style>
+		.panel-heading {
+			padding: 5px 10px;
+		}
+		
+		.panel-heading i {
+			padding-left: 5px;
+		}
+		
+		.form-inline .form-group {
+			padding: 10px 15px;
+		}
+		
+		.form-inline .form-group label {
+			padding-right: 15px;
+		}
+		
+		#table tr:nth-child(even) {
+			background: #f4f8fb;
+		}
+		
+		#toolbar {
+			padding-left: 10px;
+		}
+		
+		#toolbar .form-inline .form-group {
+			padding: 0;
+		}
+		
+		.upload {
+			text-align: center;
+			background-color: #50c3ff;
+			height: 35px;
+			line-height: 35px;
+			width: 100%;
+			border-radius: 6px;
+			font-size: 14px;
+			color: white;
+		}
+		
+		#showImg {
+			text-align: center;
+			padding-top: 10px;
+		}
+		
+		#showImg img {
+			max-width: 200px;
+		}
+	</style>
+
+	<body>
+		<div class="container-fluid">
+
+			<div class="panel panel-info panel-default">
+				<div class="panel-heading">
+					<div class="panel-title">
+						<div class="row">
+							<div class="col-xs-5 col-md-4 text-left h5">
+								<i class="fa fa-tag">&nbsp;&nbsp;信息查询</i>
+							</div>
+							<div class="col-xs-7 col-md-8 text-right h5">
+								<i class="fa fa-search" id="data-search">&nbsp;&nbsp;<a href="javascript:void(0)">查询</a></i>
+								<a class="fa fa-angle-down" id="data-search-arrow" href="javascript:void(0)"></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="data-search-panel" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="data-search-panel">
+					<div class="panel-body">
+						<form class="form-inline">
+							<div class="form-group">
+								<label for="search-id">id</label>
+								<input type="text" class="form-control" id="search-userId" placeholder="id" style="width: 140px;">
+							</div>
+							<div class="form-group">
+								<label for="search-userName">姓名</label>
+								<input type="text" class="form-control" id="search-userName" placeholder="姓名">
+							</div>
+						</form>
+					</div>
+
+				</div>
+			</div>
+			<div class="body-table">
+				<div id="toolbar">
+					<button type="button" id="queryUserCoinRecrd" class="btn btn-info">划转明细</button>
+					<button type="button" id="delAllAsset" class="btn btn-danger ">清退资产</button>
+				</div>
+
+			</div>
+			<table id="table"></table>
+		</div>
+		</div>
+
+		<div class="modal fade" tabindex="-1" role="dialog" id="data-modal" data-backdrop="static">
+			<div class="modal-dialog" role="document" aria-hidden="true">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title">操作</h4>
+					</div>
+					<div class="modal-body">
+						<table id="userRecord"></table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info" id="close-modal">关闭</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal-dialog -->
+		</div>
+		<!-- /.modal -->
+
+	</body>
+	<script type="text/javascript">
+		$(function() {
+
+			var $table = $("#table"); //初始化bootstrap-table的内容
+
+			$("#close-modal").click(function() {
+				$("#userRecord").bootstrapTable('destroy')
+				$('#data-modal').modal('hide');
+			})
+
+			$("#queryUserCoinRecrd").click(function() {
+				var objs = $table.bootstrapTable('getSelections');
+				if(objs.length == 0) {
+					alert("请选择一条记录");
+					return;
+				}
+				var obj = $table.bootstrapTable('getSelections')[0];
+				initUserRecord(obj.id);
+				$('#data-modal').modal('show');
+
+			})
+			$("#delAllAsset").click(function() {
+				var objs = $table.bootstrapTable('getSelections');
+				if(objs.length == 0) {
+					alert("请选择一条记录");
+					return;
+				}
+				
+				var r = window.confirm("删除后不可恢复");
+				if(r) {
+					$(this).text("清退中禁止操作.").attr("disabled", true);
+					var obj = $table.bootstrapTable('getSelections')[0];
+					$.ajax({
+						type: 'post',
+						url: '/admin/user/batchClearAsset',
+						cache: false,
+						dataType: 'json',
+						data: {
+							userId: obj.id
+						},
+						async: true,
+						success: function(data) {
+							if("0000" == data.code) {
+								$table.bootstrapTable('refresh');
+							} else {
+								alert(data.msg);
+							}
+							$("#delAllAsset").text("清退资产").attr("disabled", false);
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+				}
+			})
+			InitMainTable()
+
+			function InitMainTable(exportDataType) {
+				//记录页面bootstrap-table全局变量$table，方便应用
+				$table.bootstrapTable('destroy').bootstrapTable({
+					url: '/admin/user/list?rnd=' + Math.random(), //请求后台的URL（*）
+					method: 'post', //请求方式（*）
+					dataType: "json",
+					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+					toolbar: '#toolbar', //工具按钮用哪个容
+					toolbarAlign: 'right',
+					striped: false, //是否显示行间隔色
+					cache: false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+					pagination: true, //是否显示分页（*）
+					sortable: true, //是否启用排序
+					sortOrder: "asc", //排序方式
+					sidePagination: "server", //分页方式：client客户端分页，server服务端分页（*）
+					pageNumber: 1, //初始化加载第一页，默认第一页,并记录
+					pageSize: 10, //每页的记录行数（*）
+					pageList: [10, 20, 50, 100], //可供选择的每页的行数（*）
+					search: false, //是否显示表格搜索
+					strictSearch: true,
+					showColumns: true, //是否显示所有的列（选择显示的列）
+					showRefresh: true, //是否显示刷新按钮
+					showFullscreen: false,
+					minimumCountColumns: 2, //最少允许的列数
+					clickToSelect: true, //是否启用点击选中行
+					//height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+					uniqueId: "id", //每一行的唯一标识，一般为主键列
+					showToggle: false, //是否显示详细视图和列表视图的切换按钮
+					cardView: false, //是否显示详细视图
+					detailView: true, //是否显示父子表
+					singleSelect: true, //是否单选
+					showExport: false,
+					exportTypes: ['excel', 'xlsx'],
+					exportDataType: "all", //basic', 'all', 'selected'
+					//得到查询的参数
+					queryParams: function(params) {
+						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+						var temp = {
+							pageSize: params.limit, //页面大小
+							pageNo: (params.offset / params.limit) + 1, //页码
+							orderBy: params.sort, //排序列名  
+							order: params.order, //排位命令（desc，asc）
+							userName: $("#search-userName").val(),
+							userId: $("#search-userId").val(),
+						};
+						return temp;
+					},
+					columns: [{
+						checkbox: true,
+						visible: true //是否显示复选框  
+					}, {
+						field: 'id',
+						title: 'id',
+						sortable: true,
+						sortName: 'id'
+					}, {
+						field: 'userName',
+						title: '用户',
+					}, {
+						field: 'openId',
+						title: 'openId'
+					}, {
+						field: 'token',
+						title: 'token',
+					}, {
+						field: 'lastLoginTime',
+						title: '最后一次登录时间',
+						formatter: function(value, row, index) {
+							return new moment(value).format("YYYY-MM-DD HH:mm:ss");
+						}
+					}], //注册加载子表的事件
+					onExpandRow: function(index, row, $detail) {
+						loadChildTable(index, row, $detail);
+					},
+					onLoadSuccess: function(data) {
+						console.log("加载成功");
+					},
+					onLoadError: function() {
+						console.log("加载失败")
+					},
+					onDblClickRow: function(row, $element) {
+
+					}
+				});
+			};
+
+			function clearAsset(index, userId) {
+
+				var objs = $("#table" + index).bootstrapTable('getSelections');
+				if(objs.length == 0) {
+					alert("请选择一条记录");
+					return;
+				}
+				var r = window.confirm("删除后不可恢复");
+				if(r) {
+					var obj = $("#table" + index).bootstrapTable('getSelections')[0];
+					$("#toolbar" + index).find("[name='clearAsset']").text("清退中禁止操作.").attr("disabled", true);
+					$.ajax({
+						type: 'post',
+						url: '/admin/user/clearAsset',
+						cache: false,
+						dataType: 'json',
+						data: {
+							userId: userId,
+							accountId: obj.id
+						},
+						async: true,
+						success: function(data) {
+							if("0000" == data.code) {
+								$("#table" + index).bootstrapTable('refresh');
+							} else {
+								alert(data.msg);
+							}
+							$("#toolbar" + index).find("[name='clearAsset']").text("清退资产").attr("disabled", false);
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+				}
+			}
+
+			function loadChildTable(index, row, $detail) {
+
+				var toolbar = "toolbar" + index;
+
+				var html = '<div id="' + toolbar + '">' +
+					'<button type="button" name="clearAsset" class="btn btn-danger ">清除资产</i></button>' +
+					'</div>' +
+					'<table id="table' + index + '"></table>';
+
+				var curTable = $detail.append(html).find("table");
+
+				$detail.find("[name='clearAsset']").on("click", function(e) {
+					clearAsset(index, row.id, this)
+				});
+
+				$(curTable).bootstrapTable('destroy').bootstrapTable({
+					url: '/admin/user/accountList?rnd=' + Math.random(), //请求后台的URL（*）
+					method: 'post', //请求方式（*）
+					dataType: "json",
+					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+					toolbar: "#" + toolbar, //工具按钮用哪个容
+					toolbarAlign: 'right',
+					striped: false, //是否显示行间隔色
+					cache: false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+					pagination: false, //是否显示分页（*）
+					sortable: true, //是否启用排序
+					sortOrder: "asc", //排序方式
+					sidePagination: "server", //分页方式：client客户端分页，server服务端分页（*）
+					pageNumber: 1, //初始化加载第一页，默认第一页,并记录
+					pageSize: 10, //每页的记录行数（*）
+					pageList: [10, 20, 50, 100], //可供选择的每页的行数（*）
+					search: false, //是否显示表格搜索
+					strictSearch: false,
+					showColumns: true, //是否显示所有的列（选择显示的列）
+					showRefresh: true, //是否显示刷新按钮
+					showFullscreen: false,
+					minimumCountColumns: 2, //最少允许的列数
+					clickToSelect: true, //是否启用点击选中行
+					//height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+					uniqueId: "id", //每一行的唯一标识，一般为主键列
+					showToggle: false, //是否显示详细视图和列表视图的切换按钮
+					cardView: false, //是否显示详细视图
+					detailView: false, //是否显示父子表
+					singleSelect: true, //是否单选
+					showExport: false,
+					exportDataType: "basic", //basic', 'all', 'selected'
+					//得到查询的参数
+					queryParams: function(params) {
+						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+						var temp = {
+							pageSize: 200, //页面大小
+							pageNo: 1, //页码
+							userName: $("#search-userName").val(),
+							userId: row.id,
+						};
+						return temp;
+
+					},
+					columns: [{
+						checkbox: true,
+						visible: true //是否显示复选框  
+					}, {
+						field: 'coinCode',
+						title: '货币',
+					}, {
+						field: 'coins',
+						title: '资产',
+					}, {
+						field: 'canUseCoins',
+						title: '计息资产',
+					}, {
+						field: 'todayIncome',
+						title: '今日收益',
+					}, {
+						field: 'totodaIncome',
+						title: '今日收益',
+
+					}], //注册加载子表的事件
+					onLoadSuccess: function(data) {
+						console.log("加载成功");
+					},
+					onLoadError: function() {
+						console.log("加载失败")
+					},
+					onDblClickRow: function(row, $element) {
+
+					}
+				});
+			}
+
+			function initUserRecord(userId) {
+				//记录页面bootstrap-table全局变量$table，方便应用
+				$("#userRecord").bootstrapTable('destroy').bootstrapTable({
+					url: '/admin/coinRecord/list?rnd=' + Math.random(), //请求后台的URL（*）
+					method: 'post', //请求方式（*）
+					dataType: "json",
+					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+					toolbarAlign: 'right',
+					striped: false, //是否显示行间隔色
+					cache: false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+					pagination: true, //是否显示分页（*）
+					sortable: true, //是否启用排序
+					sortOrder: "asc", //排序方式
+					sidePagination: "server", //分页方式：client客户端分页，server服务端分页（*）
+					pageNumber: 1, //初始化加载第一页，默认第一页,并记录
+					pageSize: 10, //每页的记录行数（*）
+					pageList: [10, 20, 50, 100], //可供选择的每页的行数（*）
+					search: false, //是否显示表格搜索
+					strictSearch: true,
+					showColumns: true, //是否显示所有的列（选择显示的列）
+					showRefresh: true, //是否显示刷新按钮
+					showFullscreen: false,
+					minimumCountColumns: 2, //最少允许的列数
+					clickToSelect: true, //是否启用点击选中行
+					//height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+					uniqueId: "id", //每一行的唯一标识，一般为主键列
+					showToggle: false, //是否显示详细视图和列表视图的切换按钮
+					cardView: false, //是否显示详细视图
+					detailView: false, //是否显示父子表
+					singleSelect: false, //是否单选
+					showExport: false,
+					//得到查询的参数
+					queryParams: function(params) {
+						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+						var temp = {
+							pageSize: params.limit, //页面大小
+							pageNo: (params.offset / params.limit) + 1, //页码
+							orderBy: params.sort, //排序列名  
+							order: params.order, //排位命令（desc，asc）
+							userId: userId,
+						};
+						return temp;
+					},
+					columns: [{
+							checkbox: true,
+							visible: true //是否显示复选框  
+						}, {
+							field: 'userName',
+							title: '用户',
+						}, {
+							field: 'coinCode',
+							title: '货币',
+						}, {
+							field: 'coins',
+							title: '资金',
+						}, {
+							field: 'tradeType',
+							title: '交易类型',
+							formatter: function(value, row, index) {
+								if(1 == value) {
+									return '<span class="label label-success">资金存入</span>';
+								} else if(2 == value) {
+									return '<span class="label label-primary">资金取出</span>';
+								} else {
+									return '<span class="label label-warning">未知</span>';
+								}
+							}
+						},
+						{
+							field: 'status',
+							title: '状态',
+							formatter: function(value, row, index) {
+								if(1 == value) {
+									return '<span class="label label-success">成功</span>';
+								} else if(2 == value) {
+									return '<span class="label label-danger">失败</span>';
+								} else if(3 == value) {
+									return '<span class="label label-primary">处理中</span>';
+								} else {
+									return '<span class="label label-warning">未知</span>';
+								}
+							}
+						}, {
+							field: 'gmtCreate',
+							title: '日期',
+							sortable: true,
+							sortName: 'gmt_create',
+							formatter: function(value, row, index) {
+								return new moment(value).format("YYYY-MM-DD");
+							},
+
+						}
+					], //注册加载子表的事件
+				});
+			};
+		})
+	</script>
+
+</html>

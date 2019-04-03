@@ -1,5 +1,7 @@
 package com.btc.global.page;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,5 +44,15 @@ public class PageUtil {
         }
         
         return page;
+    }
+    
+    public static <T> Map<String,Object> parsePage(Map<String,Object> params,Page<T> page){
+    	if(!StringUtils.isEmpty(page.getOrderBy())){
+			params.put("orderBy", page.getOrderBy());
+			params.put("order", page.getOrder());
+		} 
+		params.put("pageNo",page.getFirst());
+		params.put("pageSize",page.getPageSize());
+    	return params;
     }
 }

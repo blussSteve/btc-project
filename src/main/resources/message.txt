@@ -1,0 +1,9 @@
+app_id:85685133141624
+secret:373c47b475b36c9c8964c2e6b33422f0
+access_code:7dc937ec-5a34-431b-9a59-d4f9715d0a5d
+openid:100036
+
+
+
+96b65f5f-501b-40ee-a7e5-554ec8bac527
+92aaab56-92b5-4b8a-afc7-7eb9c0b4b6ca

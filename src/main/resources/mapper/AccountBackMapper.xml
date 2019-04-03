@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.btc.mapper.AccountBackMapper" >
+  <resultMap id="BaseResultMap" type="com.btc.model.AccountBack" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="account_id" property="accountId" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="coins" property="coins" jdbcType="DECIMAL" />
+    <result column="can_use_coins" property="canUseCoins" jdbcType="DECIMAL" />
+    <result column="coin_code" property="coinCode" jdbcType="VARCHAR" />
+    <result column="today_coins" property="todayCoins" jdbcType="DECIMAL" />
+    <result column="today_income" property="todayIncome" jdbcType="DECIMAL" />
+    <result column="total_income" property="totalIncome" jdbcType="DECIMAL" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="count_date" property="countDate" jdbcType="DATE" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="gmt_modify" property="gmtModify" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, account_id, user_id, coins, can_use_coins, coin_code, today_coins, today_income, 
+    total_income, status, count_date, gmt_create, gmt_modify
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from btc_account_back
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from btc_account_back
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.btc.model.AccountBack" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into btc_account_back (account_id, user_id, coins, 
+      can_use_coins, coin_code, today_coins, 
+      today_income, total_income, status, 
+      count_date, gmt_create, gmt_modify
+      )
+    values (#{accountId,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{coins,jdbcType=DECIMAL}, 
+      #{canUseCoins,jdbcType=DECIMAL}, #{coinCode,jdbcType=VARCHAR}, #{todayCoins,jdbcType=DECIMAL}, 
+      #{todayIncome,jdbcType=DECIMAL}, #{totalIncome,jdbcType=DECIMAL}, #{status,jdbcType=INTEGER}, 
+      #{countDate,jdbcType=DATE}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModify,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.btc.model.AccountBack" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into btc_account_back
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="accountId != null" >
+        account_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="coins != null" >
+        coins,
+      </if>
+      <if test="canUseCoins != null" >
+        can_use_coins,
+      </if>
+      <if test="coinCode != null" >
+        coin_code,
+      </if>
+      <if test="todayCoins != null" >
+        today_coins,
+      </if>
+      <if test="todayIncome != null" >
+        today_income,
+      </if>
+      <if test="totalIncome != null" >
+        total_income,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="countDate != null" >
+        count_date,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+      <if test="gmtModify != null" >
+        gmt_modify,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="accountId != null" >
+        #{accountId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="coins != null" >
+        #{coins,jdbcType=DECIMAL},
+      </if>
+      <if test="canUseCoins != null" >
+        #{canUseCoins,jdbcType=DECIMAL},
+      </if>
+      <if test="coinCode != null" >
+        #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="todayCoins != null" >
+        #{todayCoins,jdbcType=DECIMAL},
+      </if>
+      <if test="todayIncome != null" >
+        #{todayIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="totalIncome != null" >
+        #{totalIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="countDate != null" >
+        #{countDate,jdbcType=DATE},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModify != null" >
+        #{gmtModify,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.btc.model.AccountBack" >
+    update btc_account_back
+    <set >
+      <if test="accountId != null" >
+        account_id = #{accountId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="coins != null" >
+        coins = #{coins,jdbcType=DECIMAL},
+      </if>
+      <if test="canUseCoins != null" >
+        can_use_coins = #{canUseCoins,jdbcType=DECIMAL},
+      </if>
+      <if test="coinCode != null" >
+        coin_code = #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="todayCoins != null" >
+        today_coins = #{todayCoins,jdbcType=DECIMAL},
+      </if>
+      <if test="todayIncome != null" >
+        today_income = #{todayIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="totalIncome != null" >
+        total_income = #{totalIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="countDate != null" >
+        count_date = #{countDate,jdbcType=DATE},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModify != null" >
+        gmt_modify = #{gmtModify,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.btc.model.AccountBack" >
+    update btc_account_back
+    set account_id = #{accountId,jdbcType=BIGINT},
+      user_id = #{userId,jdbcType=BIGINT},
+      coins = #{coins,jdbcType=DECIMAL},
+      can_use_coins = #{canUseCoins,jdbcType=DECIMAL},
+      coin_code = #{coinCode,jdbcType=VARCHAR},
+      today_coins = #{todayCoins,jdbcType=DECIMAL},
+      today_income = #{todayIncome,jdbcType=DECIMAL},
+      total_income = #{totalIncome,jdbcType=DECIMAL},
+      status = #{status,jdbcType=INTEGER},
+      count_date = #{countDate,jdbcType=DATE},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modify = #{gmtModify,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+   <insert id="batchInsert" parameterType="java.util.List">
+   	insert into btc_account_back (account_id, user_id, 
+      coins, can_use_coins, coin_code, 
+      today_income, total_income, status, 
+      count_date, gmt_create, gmt_modify
+      )
+    values 
+   <foreach collection="list" item="item" index="index" separator=",">
+   	( #{item.accountId,jdbcType=BIGINT}, #{item.userId,jdbcType=BIGINT}, 
+      #{item.coins,jdbcType=DECIMAL}, #{item.canUseCoins,jdbcType=DECIMAL}, #{item.coinCode,jdbcType=VARCHAR}, 
+      #{item.todayIncome,jdbcType=DECIMAL}, #{item.totalIncome,jdbcType=DECIMAL}, #{item.status,jdbcType=INTEGER}, 
+      #{item.countDate,jdbcType=DATE}, #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModify,jdbcType=TIMESTAMP}
+      )
+     </foreach>
+     </insert>
+</mapper>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="/admin/dist/bootstrap-3.3.7/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/admin/dist/bootstrap3-editable/css/bootstrap-editable.css" />
+		<link rel="stylesheet" href="/admin/dist/bootstrap-table/bootstrap-table.min.css" />
+		<link rel="stylesheet" href="/admin/dist/font-awesome-4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/dist/bootstrapvalidator/css/bootstrapValidator.min.css" />
+		<link rel="stylesheet" href="/admin/css/style.css" />
+		<script src="/admin/js/jquery-2.1.4.min.js"></script>
+		<script src="/admin/dist/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/bootstrap-table.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/locale/bootstrap-table-zh-CN.js"></script>
+		<script src="/admin/dist/bootstrapvalidator/js/bootstrapValidator.min.js"></script>
+		<script src="/admin/js/common.js"></script>
+
+	</head>
+	<style>
+		.panel-heading {
+			padding: 5px 10px;
+		}
+		
+		.panel-heading i {
+			padding-left: 5px;
+		}
+		
+		.form-inline .form-group {
+			padding: 10px 15px;
+		}
+		
+		.form-inline .form-group label {
+			padding-right: 15px;
+		}
+		
+		#table tr:nth-child(even) {
+			background: #f4f8fb;
+		}
+		
+		#toolbar {
+			padding-left: 10px;
+		}
+		
+		.upload {
+			text-align: center;
+			background-color: #50c3ff;
+			height: 35px;
+			line-height: 35px;
+			width: 100%;
+			border-radius: 6px;
+			font-size: 14px;
+			color: white;
+		}
+		
+		#showImg {
+			text-align: center;
+			padding-top: 10px;
+		}
+		
+		#showImg img {
+			max-width: 200px;
+		}
+	</style>
+
+	<body>
+		<div class="container-fluid">
+
+			<div class="panel panel-info panel-default">
+				<div class="panel-heading">
+					<div class="panel-title">
+						<div class="row">
+							<div class="col-xs-5 col-md-4 text-left h5">
+								<i class="fa fa-tag">&nbsp;&nbsp;信息查询</i>
+							</div>
+							<div class="col-xs-7 col-md-8 text-right h5">
+								<i class="fa fa-search" id="data-search">&nbsp;&nbsp;<a href="javascript:void(0)">查询</a></i>
+								<a class="fa fa-angle-down" id="data-search-arrow" href="javascript:void(0)"></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="data-search-panel" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="data-search-panel">
+					<div class="panel-body">
+						<form class="form-inline">
+							<div class="form-group">
+								<label for="search-coinCode">货币名称</label>
+								<input type="text" class="form-control" id="search-coinCode" placeholder="货币名称">
+							</div>
+							<div class="form-group">
+								<label for="search-status">状态</label>
+								<select class="form-control" id="search-status" style="width: 100px;">
+									<option value="1">启用</option>
+									<option value="0">禁用</option>
+									<option value="-1" selected="selected">全部</option>
+								</select>
+							</div>
+						</form>
+
+					</div>
+
+				</div>
+			</div>
+			<div class="body-table">
+				<div id="toolbar">
+					<button type="button" id="addData" class="btn btn-default "><i class="fa fa-plus"></i></button>
+					<button type="button" id="editData" class="btn btn-default "><i class="fa fa-edit"></i></button>
+					<button type="button" id="delData" class="btn btn-default "><i class="fa fa-remove"></i></button>
+				</div>
+				<table id="table"></table>
+			</div>
+		</div>
+		<!--一级菜单-->
+		<div class="modal fade" tabindex="-1" role="dialog" id="data-modal" data-backdrop="static">
+			<div class="modal-dialog" role="document" aria-hidden="true" style="width:500px">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title">操作</h4>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal" id="validate-form">
+							<input type="hidden" name="id" />
+							<div class="form-group">
+								<label for="coinCode" class="col-sm-3 control-label">货币名称</label>
+								<div class="col-sm-8">
+									<input type="text" onblur="this.value=this.value.toLowerCase()" name="coinCode" class="form-control" placeholder="货币名称" maxlength="20">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="coinIcon" class="col-sm-3 control-label">图片</label>
+								<div class="col-sm-8">
+									<div>
+										<input type="file" name="file" style="display: none" id="inputFile" />
+										<input type="hidden" name="coinIcon" class="form-control" readonly="readonly" />
+									</div>
+									<div >
+										<button id="uploadPic"  type="button" class="btn btn-info" style="width: 100%;">上传图片</button>
+									</div>
+									<div id="showImg">
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="coinColor" class="col-sm-3 control-label">颜色</label>
+								<div class="col-sm-8">
+									<input type="text" class="form-control" name="coinColor" placeholder="颜色" maxlength="24" style="width: 120px;">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="minIncomeCount" class="col-sm-3 control-label">最小计息量</label>
+								<div class="col-sm-8">
+									<input type="text" onblur="if (!/^\d+(\.\d+)?$/.test(this.value)){this.value='';}" class="form-control" name="minIncomeCount" placeholder="最小计息量" maxlength="24">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="minTurnInCount" class="col-sm-3 control-label">最小转入量</label>
+								<div class="col-sm-8">
+									<input type="text" onblur="if (!/^\d+(\.\d+)?$/.test(this.value)){this.value='';}" class="form-control" name="minTurnInCount" placeholder="最小转入量" maxlength="24">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="minTurnOutCount" onblur="if (!/^\d+(\.\d+)?$/.test(this.value)){this.value='';}" class="col-sm-3 control-label">最小转出量</label>
+								<div class="col-sm-8">
+									<input type="text" class="form-control" name="minTurnOutCount" placeholder="最小转出量" maxlength="24">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="status" class="col-sm-3 control-label">状态</label>
+								<div class="col-sm-8">
+									<div class="radio">
+										<label>
+											<input type="radio" name="status" value="1" >启用
+										</label>
+									</div>
+									<div class="radio">
+										<label>
+											<input type="radio" name="status" value="0">禁用
+										</label>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-info" id="save-data">确定</button>
+						<button type="button" class="btn btn-info" id="close-modal">取消</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal-dialog -->
+		</div>
+		<!-- /.modal -->
+	</body>
+	<script type="text/javascript">
+		$(function() {
+
+			var $table = $("#table"); //初始化bootstrap-table的内容
+
+			//搜索
+			$("#data-search").click(function() {
+				$table.bootstrapTable('refresh');
+			});
+			//新增
+			$("#addData").click(function() {
+				$('#data-modal').modal('show');
+
+			})
+			$("#editData").click(function(){
+				var objs = $table.bootstrapTable('getSelections');
+				if(objs.length==0){
+					return;
+				}
+				var obj=objs[0];
+				
+				$("#validate-form input[name='id']").val(obj.id);
+				$("#validate-form input[name='coinCode']").val(obj.coinCode);
+				$("#validate-form input[name='coinIcon']").val(obj.coinIcon);
+				var img = '<img src="' + obj.coinIcon + '"/>';
+				$("#showImg").html(img);
+				$("#validate-form input[name='coinColor']").val(obj.coinColor);
+				$("#validate-form input[name='minIncomeCount']").val(obj.minIncomeCount);
+				$("#validate-form input[name='minTurnInCount']").val(obj.minTurnInCount);
+				$("#validate-form input[name='minTurnOutCount']").val(obj.minTurnOutCount);
+				
+				if(obj.status==1){
+					$("input:radio[name=status][value=1]").attr("checked", true);
+				}else{
+					$("input:radio[name=status][value=0]").attr("checked", true);
+				}
+				
+				$('#data-modal').modal('show');
+			});
+			$("#delData").click(function() {
+				var objs = $table.bootstrapTable('getSelections');
+				if(objs.length==0){
+					return;
+				}
+				var r = window.confirm("删除后不可恢复");
+				if(r) {
+					var obj = $table.bootstrapTable('getSelections')[0];
+					$.ajax({
+						type: 'post',
+						url: '/admin/system/delSysCoinsDic',
+						cache: false,
+						data: {
+							dicId: obj.id
+						},
+						dataType: 'json',
+						success: function(data) {
+							if("0000" == data.code) {
+								alert("成功");
+								//刷新数据
+								$table.bootstrapTable('refresh');
+							} else {
+								alert(data.msg);
+							}
+
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+
+				}
+			})
+
+			$("#save-data").click(function() {
+				var bootstrapValidator = $("#validate-form").data('bootstrapValidator');
+				bootstrapValidator.validate();
+				if(bootstrapValidator.isValid()) {
+
+					var form = $("#validate-form").serialize();
+					$.ajax({
+						type: 'post',
+						url: '/admin/system/savaOrUpdateSysCoinsDic',
+						cache: false,
+						data: form,
+						dataType: 'json',
+						success: function(data) {
+							if("0000" == data.code) {
+								alert("成功");
+								//关闭模态框
+								//移除上一次的校验结果，重新添加表单校验。
+								$("#validate-form").data('bootstrapValidator').destroy();
+								$('#validate-form').data('bootstrapValidator', null);
+								formValidator();
+								
+								$("#validate-form input:text").val("");
+								
+								$('#data-modal').modal('hide');
+								$('#showImg').html('');
+								//刷新数据
+								$table.bootstrapTable('refresh');
+							} else {
+								alert(data.msg);
+							}
+
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+
+				} else {
+					alert("失败")
+				}
+			})
+			$("#close-modal").click(function() {
+				//移除上一次的校验结果，重新添加表单校验。
+				$("#validate-form").data('bootstrapValidator').destroy();
+				$('#validate-form').data('bootstrapValidator', null);
+				formValidator();
+				$("#validate-form input:text").val("");
+				$('#data-modal').modal('hide');
+				$('#showImg').empty();
+				
+			})
+
+			function statusFormatter(value, row, index) {
+
+				return '<a href="javascript:void(0)" class="status">' + (value == "1" ? "启用" : "禁用") + '</a>';
+			}
+			window.statusEnvents = {
+				'click .status': function(e, value, row, index) {
+					
+					var status=1;
+					if(row.status==1){
+						status=0;
+					}
+					
+					$.ajax({
+						type: 'post',
+						url: '/admin/system/updateCoinsDicStatus',
+						cache: false,
+						data: {id:row.id,status:status},
+						dataType: 'json',
+						success: function(data) {
+							if("0000" == data.code) {
+								//刷新数据
+								$table.bootstrapTable('refresh');
+							} else {
+								alert(data.msg);
+							}
+
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+				}
+			}
+
+			function InitMainTable() {
+				//记录页面bootstrap-table全局变量$table，方便应用
+				$table.bootstrapTable('destroy').bootstrapTable({
+					url: '/admin/system/querySysCoins?rnd=' + Math.random(), //请求后台的URL（*）
+					method: 'post', //请求方式（*）
+					dataType: "json",
+					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+					toolbar: '#toolbar', //工具按钮用哪个容
+					toolbarAlign: 'right',
+					striped: false, //是否显示行间隔色
+					cache: false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+					pagination: true, //是否显示分页（*）
+					sortable: true, //是否启用排序
+					sortOrder: "asc", //排序方式
+					sidePagination: "server", //分页方式：client客户端分页，server服务端分页（*）
+					pageNumber: 1, //初始化加载第一页，默认第一页,并记录
+					pageSize: 10, //每页的记录行数（*）
+					pageList: [10, 20, 50, 100], //可供选择的每页的行数（*）
+					search: false, //是否显示表格搜索
+					strictSearch: true,
+					showColumns: true, //是否显示所有的列（选择显示的列）
+					showRefresh: true, //是否显示刷新按钮
+					showFullscreen: false,
+					minimumCountColumns: 2, //最少允许的列数
+					clickToSelect: true, //是否启用点击选中行
+					//height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+					uniqueId: "id", //每一行的唯一标识，一般为主键列
+					showToggle: false, //是否显示详细视图和列表视图的切换按钮
+					cardView: false, //是否显示详细视图
+					detailView: false, //是否显示父子表
+					singleSelect: true, //是否单选
+					showExport: false,
+					exportDataType: "basic", //basic', 'all', 'selected'
+					//得到查询的参数
+					queryParams: function(params) {
+						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+						var temp = {
+							pageSize: params.limit, //页面大小
+							pageNo: (params.offset / params.limit) + 1, //页码
+							orderBy: params.sort, //排序列名  
+							order: params.order, //排位命令（desc，asc）
+							coinCode: $("#search-coinCode").val(),
+							status:$("#search-status").val()
+						};
+						return temp;
+					},
+					columns: [{
+						checkbox: true,
+						visible: true //是否显示复选框  
+					}, {
+						field: 'coinCode',
+						title: '货币名称',
+					}, {
+						field: 'coinIcon',
+						title: '图标',
+						align: 'center',
+						formatter: function(value, row, index) {
+							return '<img src="' + value + '" width="60px">'
+						}
+					}, {
+						field: 'coinColor',
+						title: '颜色'
+					}, {
+						field: 'minIncomeCount',
+						title: '最小计息数量'
+					}, {
+						field: 'minTurnInCount',
+						title: '最小转入数量'
+					}, {
+						field: 'minTurnOutCount',
+						title: '最小计息数量'
+					}, {
+						field: 'status',
+						title: '状态',
+						events: window.statusEnvents,
+						formatter: statusFormatter
+					}], //注册加载子表的事件
+					onExpandRow: function(index, row, $detail) {
+						loadChildTable(index, row, $detail);
+					},
+					onLoadSuccess: function(data) {
+						console.log("加载成功");
+					},
+					onLoadError: function() {
+						console.log("加载失败")
+					},
+					onDblClickRow: function(row, $element) {
+
+					},
+					onEditableSave: function(field, row, oldValue, $el) {
+						var form = new FormData();
+						form.append("id", row.id);
+
+						if(row.itemName != null) {
+							form.append("itemName", row.itemName);
+						}
+						if(row.orderIndex != null) {
+							form.append("orderIndex", row.orderIndex);
+						}
+						if(row.status != null) {
+							form.append("status", row.status);
+						}
+
+						$.ajax({
+							type: 'post',
+							url: '/admin/systemFirstItem/addFirstItem',
+							cache: false,
+							data: form,
+							processData: false,
+							contentType: false,
+							success: function(data) {
+								if("0000" == data.code) {
+									alert("成功");
+									//关闭模态框
+									//移除上一次的校验结果，重新添加表单校验。
+									$("#validate-form").data('bootstrapValidator').destroy();
+									$('#validate-form').data('bootstrapValidator', null);
+									fatherFormValidator();
+									$("#validate-form input").val("");
+									$('#data-modal').modal('hide');
+
+									//刷新数据
+									$table.bootstrapTable('refresh');
+								} else {
+									alert(data.msg);
+								}
+
+							},
+							error: function() {
+								alert("请求失败")
+							}
+						})
+					}
+				});
+			};
+			InitMainTable(); //表单验证
+			formValidator();
+
+			function formValidator() {
+				$("#validate-form").bootstrapValidator({
+					message: 'This value is not valid',
+					feedbackIcons: {
+						valid: 'glyphicon glyphicon-ok',
+						invalid: 'glyphicon glyphicon-remove',
+						validating: 'glyphicon glyphicon-refresh'
+					},
+					excluded: [":disabled"], //关键配置，表示只对于禁用域不进行验证，其他的表单元素都要验证
+					fields: {
+						coinCode: {
+							validators: {
+								notEmpty: {
+									message: '货币名称不能为空'
+								},
+								callback: {
+									message: '货币已存在,请重新输入',
+									callback: function(value, validator) {
+										var obj = $table.bootstrapTable('getSelections')[0];
+										if(obj!=null){
+											if(obj.coinCode==value){
+												return true;
+											}
+										}
+										
+										var r = true;
+										$.ajax({
+											type: 'post',
+											url: "/admin/system/checkCoinCodeIsExist",
+											cache: false,
+											data: {
+												coinCode: value
+											},
+											async: false,
+											dataType: 'json',
+											success: function(data) {
+												if(data.data) {
+													r = false;
+												}
+											},
+											error: function() {
+												alert("请求失败")
+											}
+										})
+
+										return r;
+
+									}
+								},
+							}
+						},
+						coinIcon: {
+							validators: {
+								notEmpty: {
+									message: '请上传图片'
+								}
+							}
+						},
+						minIncomeCount: {
+							validators: {
+								notEmpty: {
+									message: '最小计息数量不能为空'
+								}
+							}
+						},
+						minTurnInCount: {
+							validators: {
+								notEmpty: {
+									message: '最小转入数量不能为空'
+								}
+							}
+						},
+						minTurnOutCount: {
+							validators: {
+								notEmpty: {
+									message: '最小转出数量不能为空'
+								}
+							}
+						},
+						status: {
+							message: '验证失败',
+							validators: {
+								notEmpty: {
+									message: '状态不能为空'
+								}
+							}
+						},
+
+					}
+				}).on('success.form.bv', function(e) {
+					// 阻止默认事件提交
+					e.preventDefault();
+				});
+			}
+
+			$("#uploadPic").click(function() {
+				return $("#inputFile").click();
+			});
+
+			$("#inputFile").on('change', function() {
+				var fd = new FormData();
+				fd.append("imgType", 10);
+				fd.append("file", $("#inputFile").get(0).files[0]);
+				$.ajax({
+					url: "http://localhost:8088//front/noAuth/uploadImg",
+					type: "POST",
+					processData: false,
+					contentType: false,
+					data: fd,
+					success: function(data) {
+						var img = '<img src="' + data.data + '"/>';
+						$("#showImg").html(img);
+						$("#validate-form input[name='coinIcon']").val(data.data);
+					},
+					error: function(xhr, state, errorThrown) {
+						console.log(xhr);
+					}
+
+				});
+
+			})
+
+
+		})
+	</script>
+
+</html>

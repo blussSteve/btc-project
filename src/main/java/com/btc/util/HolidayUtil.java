@@ -1,6 +1,5 @@
 package com.btc.util;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,6 +10,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.btc.global.enums.SysConfigEnum;
 import com.btc.service.RedisService;
 
 @Component
@@ -95,12 +95,14 @@ public class HolidayUtil {
 	 */
 	public static boolean isCanTran(){
 		
-		if(isHoliday()){
-			return false;
-		}
+//		if(isHoliday()){
+//			return false;
+//		}
+		String beginDate=instance.redisService.hget(Constants.SYS_DIC_CACHE, SysConfigEnum.COUNT_INCOME_BEGIN_DATE.getKey());
+		String endDate=instance.redisService.hget(Constants.SYS_DIC_CACHE, SysConfigEnum.COUNT_INCOME_END_DATE.getKey());
 		Calendar current = Calendar.getInstance();
 		int hour=current.get(Calendar.HOUR_OF_DAY);
-		if(hour<9||hour>14){
+		if(hour>Integer.parseInt(beginDate)&&hour<Integer.parseInt(endDate)){
 			return false;
 		} 
 		return true;

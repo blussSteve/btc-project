@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.btc.mapper.AssetIncomeRecordMapper" >
+  <resultMap id="BaseResultMap" type="com.btc.model.AssetIncomeRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="coin_code" property="coinCode" jdbcType="VARCHAR" />
+    <result column="coin_income" property="coinIncome" jdbcType="DECIMAL" />
+    <result column="usdt_init" property="usdtInit" jdbcType="DECIMAL" />
+    <result column="usdt_income" property="usdtIncome" jdbcType="DECIMAL" />
+    <result column="count_date" property="countDate" jdbcType="DATE" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, coin_code, coin_income, usdt_init, usdt_income, count_date, gmt_create
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from btc_asset_income_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from btc_asset_income_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.btc.model.AssetIncomeRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into btc_asset_income_record (coin_code, coin_income, usdt_init, 
+      usdt_income, count_date, gmt_create
+      )
+    values (#{coinCode,jdbcType=VARCHAR}, #{coinIncome,jdbcType=DECIMAL}, #{usdtInit,jdbcType=DECIMAL}, 
+      #{usdtIncome,jdbcType=DECIMAL}, #{countDate,jdbcType=DATE}, #{gmtCreate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.btc.model.AssetIncomeRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into btc_asset_income_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="coinCode != null" >
+        coin_code,
+      </if>
+      <if test="coinIncome != null" >
+        coin_income,
+      </if>
+      <if test="usdtInit != null" >
+        usdt_init,
+      </if>
+      <if test="usdtIncome != null" >
+        usdt_income,
+      </if>
+      <if test="countDate != null" >
+        count_date,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="coinCode != null" >
+        #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="coinIncome != null" >
+        #{coinIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="usdtInit != null" >
+        #{usdtInit,jdbcType=DECIMAL},
+      </if>
+      <if test="usdtIncome != null" >
+        #{usdtIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="countDate != null" >
+        #{countDate,jdbcType=DATE},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.btc.model.AssetIncomeRecord" >
+    update btc_asset_income_record
+    <set >
+      <if test="coinCode != null" >
+        coin_code = #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="coinIncome != null" >
+        coin_income = #{coinIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="usdtInit != null" >
+        usdt_init = #{usdtInit,jdbcType=DECIMAL},
+      </if>
+      <if test="usdtIncome != null" >
+        usdt_income = #{usdtIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="countDate != null" >
+        count_date = #{countDate,jdbcType=DATE},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.btc.model.AssetIncomeRecord" >
+    update btc_asset_income_record
+    set coin_code = #{coinCode,jdbcType=VARCHAR},
+      coin_income = #{coinIncome,jdbcType=DECIMAL},
+      usdt_init = #{usdtInit,jdbcType=DECIMAL},
+      usdt_income = #{usdtIncome,jdbcType=DECIMAL},
+      count_date = #{countDate,jdbcType=DATE},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <insert id="batchInsert" parameterType="java.util.List">
+       insert into btc_asset_income_record (coin_code, coin_income, usdt_init, 
+      usdt_income, count_date, gmt_create
+      )
+    values
+   <foreach collection="list" item="item" index="index" separator=",">
+    (#{item.coinCode,jdbcType=VARCHAR}, #{item.coinIncome,jdbcType=DECIMAL}, #{item.usdtInit,jdbcType=DECIMAL}, 
+      #{item.usdtIncome,jdbcType=DECIMAL}, #{item.countDate,jdbcType=DATE}, #{item.gmtCreate,jdbcType=TIMESTAMP}
+      )
+     </foreach>
+     </insert>
+</mapper>

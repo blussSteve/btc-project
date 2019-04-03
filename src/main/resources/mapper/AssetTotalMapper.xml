@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.btc.mapper.AssetTotalMapper">
+	<resultMap id="BaseResultMap" type="com.btc.model.AssetTotal">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="coin_code" property="coinCode" jdbcType="VARCHAR" />
+		<result column="coins" property="coins" jdbcType="DECIMAL" />
+		<result column="today_income" property="todayIncome" jdbcType="DECIMAL" />
+		<result column="total_income" property="totalIncome" jdbcType="DECIMAL" />
+		<result column="yesterday_coins" property="yesterdayCoins" jdbcType="DECIMAL" />
+		<result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+		<result column="gmt_modify" property="gmtModify" jdbcType="TIMESTAMP" />
+		<result column="coin_icon" property="coinIcon"  />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, coin_code, coins, today_income, total_income, yesterday_coins,
+		gmt_create, gmt_modify
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from btc_asset_total
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from btc_asset_total
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.btc.model.AssetTotal">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into btc_asset_total (coin_code, coins, today_income,
+		total_income, yesterday_coins, gmt_create,
+		gmt_modify)
+		values (#{coinCode,jdbcType=VARCHAR}, #{coins,jdbcType=DECIMAL},
+		#{todayIncome,jdbcType=DECIMAL},
+		#{totalIncome,jdbcType=DECIMAL}, #{yesterdayCoins,jdbcType=DECIMAL}, #{gmtCreate,jdbcType=TIMESTAMP},
+		#{gmtModify,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.btc.model.AssetTotal">
+		<selectKey resultType="java.lang.Long" keyProperty="id"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into btc_asset_total
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="coinCode != null">
+				coin_code,
+			</if>
+			<if test="coins != null">
+				coins,
+			</if>
+			<if test="todayIncome != null">
+				today_income,
+			</if>
+			<if test="totalIncome != null">
+				total_income,
+			</if>
+			<if test="yesterdayCoins != null">
+				yesterday_coins,
+			</if>
+			<if test="gmtCreate != null">
+				gmt_create,
+			</if>
+			<if test="gmtModify != null">
+				gmt_modify,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="coinCode != null">
+				#{coinCode,jdbcType=VARCHAR},
+			</if>
+			<if test="coins != null">
+				#{coins,jdbcType=DECIMAL},
+			</if>
+			<if test="todayIncome != null">
+				#{todayIncome,jdbcType=DECIMAL},
+			</if>
+			<if test="totalIncome != null">
+				#{totalIncome,jdbcType=DECIMAL},
+			</if>
+			<if test="yesterdayCoins != null">
+				#{yesterdayCoins,jdbcType=DECIMAL},
+			</if>
+			<if test="gmtCreate != null">
+				#{gmtCreate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="gmtModify != null">
+				#{gmtModify,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.btc.model.AssetTotal">
+		update btc_asset_total
+		<set>
+			<if test="coinCode != null">
+				coin_code = #{coinCode,jdbcType=VARCHAR},
+			</if>
+			<if test="coins != null">
+				coins = #{coins,jdbcType=DECIMAL},
+			</if>
+			<if test="todayIncome != null">
+				today_income = #{todayIncome,jdbcType=DECIMAL},
+			</if>
+			<if test="totalIncome != null">
+				total_income = #{totalIncome,jdbcType=DECIMAL},
+			</if>
+			<if test="yesterdayCoins != null">
+				yesterday_coins = #{yesterdayCoins,jdbcType=DECIMAL},
+			</if>
+			<if test="gmtCreate != null">
+				gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="gmtModify != null">
+				gmt_modify = #{gmtModify,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.btc.model.AssetTotal">
+		update btc_asset_total
+		set coin_code = #{coinCode,jdbcType=VARCHAR},
+		coins = #{coins,jdbcType=DECIMAL},
+		today_income = #{todayIncome,jdbcType=DECIMAL},
+		total_income = #{totalIncome,jdbcType=DECIMAL},
+		yesterday_coins = #{yesterdayCoins,jdbcType=DECIMAL},
+		gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+		gmt_modify = #{gmtModify,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+
+	<insert id="batchInsert" parameterType="java.util.List">
+		insert into btc_asset_total (coin_code, coins, today_income,
+		total_income, yesterday_coins, gmt_create,
+		gmt_modify)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.coinCode,jdbcType=VARCHAR}, #{item.coins,jdbcType=DECIMAL},
+			#{item.todayIncome,jdbcType=DECIMAL},
+			#{item.totalIncome,jdbcType=DECIMAL},
+			#{item.yesterdayCoins,jdbcType=DECIMAL},
+			#{item.gmtCreate,jdbcType=TIMESTAMP},
+			#{item.gmtModify,jdbcType=TIMESTAMP})
+		</foreach>
+	</insert>
+
+	<sql id="page_sort_condition">
+		limit #{pageNo},#{pageSize}
+	</sql>
+	<!-- 排序条件 -->
+	<sql id="order_by_condition">
+		<if test="orderBy != '' and  orderBy != null ">
+			ORDER BY ${orderBy} ${order}
+		</if>
+	</sql>
+
+	<select id="queryCoinAssetTotal" parameterType="java.util.HashMap"
+		resultMap="BaseResultMap">
+		SELECT t.*,c.coin_icon FROM btc_asset_total t,sys_coins_dic c WHERE
+		t.coin_code=c.coin_code
+		<if test="orderBy != '' and  orderBy != null ">
+			ORDER BY t.${orderBy} ${order}
+		</if>
+		<include refid="page_sort_condition"></include>
+	</select>
+
+	<select id="getCoinAssetTotalCount" parameterType="java.util.HashMap"
+		resultType="java.lang.Integer">
+		SELECT count(1) FROM btc_asset_total t,sys_coins_dic c WHERE
+		t.coin_code=c.coin_code
+	</select>
+</mapper>

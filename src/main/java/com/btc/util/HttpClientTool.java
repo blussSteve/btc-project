@@ -3,19 +3,19 @@ package com.btc.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.json.JSONObject;
 
@@ -35,25 +35,46 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSON;
+import com.btc.lbank.bean.LbankToken;
 
 public class HttpClientTool {
-	private static Logger logger = Logger.getLogger(HttpClientTool.class);
+	private static Logger logger = LoggerFactory.getLogger(HttpClientTool.class);
     private static final CloseableHttpClient httpClient;
     public static final String CHARSET = "UTF-8";
  
     static {
+    	 PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+         cm.setMaxTotal(1000);
+         cm.setDefaultMaxPerRoute(100);
         RequestConfig config = RequestConfig.custom().setConnectTimeout(60000).setSocketTimeout(15000).build();
-        httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+        httpClient = HttpClientBuilder.create().
+        		setDefaultRequestConfig(config).
+        		setRetryHandler(new StandardHttpRequestRetryHandler()).
+        		evictExpiredConnections().
+        		setConnectionManager(cm).
+        		build();
     }
- 
+    
+    public static String doGet(String url, Map<String, String> params,Map<String,String> headers){
+        return doGet(url, params,headers,CHARSET);
+    }
+    public static String doPost(String url, Map<String, String> params,Map<String,String> headers){
+        return doPost(url, params,headers,CHARSET);
+    }
+    
     public static String doGet(String url, Map<String, String> params){
-        return doGet(url, params,CHARSET);
+        return doGet(url, params,null,CHARSET);
     }
     public static String doPost(String url, Map<String, String> params){
-        return doPost(url, params,CHARSET);
+        return doPost(url, params,null,CHARSET);
     }
     /**
      * HTTP Get 获取内容
@@ -62,8 +83,8 @@ public class HttpClientTool {
      * @param charset    编码格式
      * @return    页面内容
      */
-    public static String doGet(String url,Map<String,String> params,String charset){
-    	logger.info("httpGet请求开始:url="+url+"||params:"+JSONObject.fromObject(params)+"||charset:"+charset);
+    public static String doGet(String url,Map<String,String> params,Map<String,String> headers, String charset){
+    	logger.info("httpGet请求开始:url={}||params:{}||headers:{}||charset:{}",url,JSONObject.fromObject(params),JSONObject.fromObject(headers),charset);
         if(StringUtils.isBlank(url)){
             return null;
         }
@@ -79,6 +100,11 @@ public class HttpClientTool {
                 url += "?" + EntityUtils.toString(new UrlEncodedFormEntity(pairs, charset));
             }
             HttpGet httpGet = new HttpGet(url);
+            if(null!=headers){
+            	 for(Entry<String, String> entry: headers.entrySet()){
+               	  httpGet.setHeader(entry.getKey(), entry.getValue());
+               }
+            }
             CloseableHttpResponse response = httpClient.execute(httpGet);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
@@ -92,7 +118,7 @@ public class HttpClientTool {
             }
             EntityUtils.consume(entity);
             response.close();
-        	logger.info("httpGet请求结束:"+response);
+        	logger.info("httpGet请求结束:"+result);
         	if(null!=result)
         		result=result.trim();
             return result;
@@ -110,8 +136,8 @@ public class HttpClientTool {
      * @param charset    编码格式
      * @return    页面内容
      */
-    public static String doPost(String url,Map<String,String> params,String charset){
-    	logger.info("httpPost请求开始:url="+url+"||params:"+JSONObject.fromObject(params)+"||charset:"+charset);
+    public static String doPost(String url,Map<String,String> params, Map<String,String> headers, String charset){
+    	logger.info("httpPost请求开始:url={}||params:{}||headers:{}||charset:{}",url,JSONObject.fromObject(params),JSONObject.fromObject(headers),charset);
         if(StringUtils.isBlank(url)){
             return null;
         }
@@ -127,6 +153,12 @@ public class HttpClientTool {
                 }
             }
             HttpPost httpPost = new HttpPost(url);
+            
+            if(null!=headers){
+	           	 for(Entry<String, String> entry: headers.entrySet()){
+	           		httpPost.setHeader(entry.getKey(), entry.getValue());
+	              }
+           }
             if(pairs != null && pairs.size() > 0){
                 httpPost.setEntity(new UrlEncodedFormEntity(pairs,CHARSET));
             }
@@ -146,7 +178,7 @@ public class HttpClientTool {
             response.close();
             if(null!=result)
         		result=result.trim();
-            logger.info("httpPost请求结束:"+response);
+            logger.info("httpPost请求结束:"+result);
             return result;
         } catch (Exception e) {
         	logger.error("httpPost请求异常",e);
@@ -285,6 +317,24 @@ public class HttpClientTool {
 	    } 
 	}
    
+   
+   public static void main(String[] args) {
+	   
+	  String url="http://140.206.187.210:9001/security/tocken";
+	  Map<String,String> params=new HashMap<String,String>();
+	  params.put("client_id", "85685133141624");
+	  params.put("access_code ", "7dc937ec-5a34-431b-9a59-d4f9715d0a5d");
+	  
+	  Map<String,String> headers=new HashMap<String,String>();
+	  headers.put("authorization", "373c47b475b36c9c8964c2e6b33422f0");
+	   
+	  String str=HttpClientTool.doPost(url,params,headers);
+	  
+	  LbankToken token=JSON.parseObject(str, LbankToken.class);
+	  
+	  System.out.println(JSON.toJSONString(token));
+	
+}
 
    
    

@@ -22,4 +22,21 @@ public class Constants {
     public static final String SYS_NOTIFY_TIME_CACHE="sys_notify_time";
     
     
+    public static final String COUNT_INCOME_KEY="count_income";
+    
+    /**系统字典缓存**/
+    public static final String SYS_DIC_CACHE="sys_dic";
+    
+    public static final String USER_TOKEN_CACHE="USER_TOKEN:";
+    
+    public static final long USER_TOKEN_TIME=7200;
+    
+    /**lbank token 缓存key*/
+    public static final String LBANK_TOKEN_CACHE="LBANK_TOKEN:";
+    
+    /**lbank token 缓存时间*/
+    public static final long LBANK_TOKEN_TIME_CACHE=7000;
+    
+    
+    public static final String ASSET_TASK_KEY="ASSET_TASK_KEY";
 }

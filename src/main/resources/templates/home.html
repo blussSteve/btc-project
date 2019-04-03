@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="/admin/dist/bootstrap-3.3.7/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/admin/dist/bootstrap-table/bootstrap-table.min.css" />
+		<link rel="stylesheet" href="/admin/dist/font-awesome-4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/style.css" />
+		<script src="/admin/js/jquery-2.1.4.min.js"></script>
+		<script src="/admin/dist/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/bootstrap-table.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/locale/bootstrap-table-zh-CN.js"></script>
+		<script src="/admin/js/common.js"></script>
+		<script src="/admin/js/moment.js"></script>
+		<script src="/admin/js/echarts.min.js"></script>
+
+	</head>
+	<style>
+		.panel-heading {
+			padding: 5px 10px;
+		}
+		
+		.panel-heading i {
+			padding-left: 5px;
+		}
+		
+		.form-inline .form-group {
+			padding: 10px 15px;
+		}
+		
+		.form-inline .form-group label {
+			padding-right: 15px;
+		}
+		
+		#table tr:nth-child(even) {
+			background: #f4f8fb;
+		}
+		
+		#toolbar {
+			padding-left: 10px;
+		}
+		
+		.upload {
+			text-align: center;
+			background-color: #50c3ff;
+			height: 35px;
+			line-height: 35px;
+			width: 100%;
+			border-radius: 6px;
+			font-size: 14px;
+			color: white;
+		}
+		
+		#showImg {
+			text-align: center;
+			padding-top: 10px;
+		}
+		
+		#showImg img {
+			max-width: 200px;
+		}
+		
+		.red {
+			color: red;
+		}
+		
+		.green {
+			color: green;
+		}
+		
+		#table {
+			table-layout: fixed !important;
+		}
+	</style>
+
+	<body>
+		<div class="container-fluid" style="height: 100%">
+			<div class="body-table">
+				<table id="table" class="table_list_box"></table>
+			</div>
+			<div id="kline" style="height: 300px"></div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(function() {
+
+			var $table = $("#table"); //初始化bootstrap-table的内容
+			var coins = new Array();
+
+			InitMainTable();
+
+			function InitMainTable(exportDataType) {
+				//记录页面bootstrap-table全局变量$table，方便应用
+				$table.bootstrapTable('destroy').bootstrapTable({
+					url: '/admin/system/queryAssetTotal?rnd=' + Math.random(), //请求后台的URL（*）
+					method: 'post', //请求方式（*）
+					dataType: "json",
+					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+					//					toolbar: '#toolbar', //工具按钮用哪个容
+					toolbarAlign: 'right',
+					striped: false, //是否显示行间隔色
+					cache: false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+					pagination: true, //是否显示分页（*）
+					sortable: true, //是否启用排序
+					sortOrder: "asc", //排序方式
+					sidePagination: "server", //分页方式：client客户端分页，server服务端分页（*）
+					pageNumber: 1, //初始化加载第一页，默认第一页,并记录
+					pageSize: 10, //每页的记录行数（*）
+					pageList: [10, 20, 50, 100], //可供选择的每页的行数（*）
+					search: false, //是否显示表格搜索
+					strictSearch: false,
+					showColumns: false, //是否显示所有的列（选择显示的列）
+					showRefresh: false, //是否显示刷新按钮
+					showFullscreen: false,
+					minimumCountColumns: 2, //最少允许的列数
+					clickToSelect: true, //是否启用点击选中行
+					height: 250, //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+					uniqueId: "id", //每一行的唯一标识，一般为主键列
+					showToggle: false, //是否显示详细视图和列表视图的切换按钮
+					cardView: false, //是否显示详细视图
+					detailView: false, //是否显示父子表
+					singleSelect: false, //是否单选
+					showExport: false,
+					//得到查询的参数
+					queryParams: function(params) {
+						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+						var temp = {
+							pageSize: params.limit, //页面大小
+							pageNo: (params.offset / params.limit) + 1, //页码
+							orderBy: params.sort, //排序列名  
+							order: params.order, //排位命令（desc，asc）
+						};
+						return temp;
+					},
+					columns: [{
+							checkbox: true,
+							visible: false //是否显示复选框  
+						}, {
+							field: 'coinIcon',
+							title: '图标',
+							formatter: function(value, row, index) {
+								return '<img style="width:30px" src="' + value + '"/>';
+							}
+						}, {
+							field: 'coinCode',
+							title: '货币',
+						}, {
+							field: 'coins',
+							title: '可用数量',
+						},
+						{
+							field: 'todayIncome',
+							title: '今日产生利息',
+						}, {
+							field: 'totalIncome',
+							title: '累计产生利息',
+						}, {
+							field: '',
+							title: '增长',
+							align: 'center',
+							formatter: function(value, row, index) {
+								var m = 100;
+								if(0 != row.yesterdayCoins) {
+									m = ((row.coins - row.yesterdayCoins) / row.yesterdayCoins * 100).toFixed(2);
+								}
+								if(m > 0) {
+									return '<i class="fa fa-long-arrow-up font red"> ' + m + '%</i>'
+								}
+								return '<i class="fa fa-long-arrow-down font green"> ' + m + '%</i>'
+							},
+
+						}
+					], //注册加载子表的事件
+					onExpandRow: function(index, row, $detail) {},
+					onLoadSuccess: function(data) {
+						console.log("加载成功");
+					},
+					onLoadError: function() {
+						console.log("加载失败")
+					},
+					onDblClickRow: function(row, $element) {
+
+					}
+				});
+			};
+
+			loadLineData();
+
+			function loadLineData() {
+
+				$.ajax({
+					type: 'post',
+					url: '/admin/system/queryAssetLine',
+					cache: false,
+					dataType: 'json',
+					async: true,
+					success: function(data) {
+						if("0000" == data.code) {
+							createEchart(data.data);
+						} else {
+							alert(data.msg);
+						}
+
+					},
+					error: function() {
+						alert("请求失败")
+					}
+				})
+
+			}
+
+			function createEchart(data) {
+				var titles = new Array();
+				var series = new Array(); 
+				for(var key in data.data) {
+					titles.push(key);
+
+					var obj = {
+						name: key,
+						type: 'line',
+						stack: '总量',
+						data: data.data[key]
+					}
+					series.push(obj);
+
+				}
+				var dom = document.getElementById("kline");
+				var myChart = echarts.init(dom);
+				var app = {};
+				option = null;
+				option = {
+					title: {
+						text: '收益'
+					},
+					tooltip: {
+						trigger: 'axis'
+					},
+					legend: {
+						data: titles
+					},
+					grid: {
+						left: '3%',
+						right: '4%',
+						bottom: '3%',
+						containLabel: true
+					},
+					toolbox: {
+						feature: {
+							saveAsImage: {}
+						}
+					},
+					xAxis: {
+						type: 'category',
+						boundaryGap: false,
+						data: data.date
+					},
+					yAxis: {
+						type: 'value'
+					},
+					series: series
+				};;
+				if(option && typeof option === "object") {
+					myChart.setOption(option, true);
+				}
+
+			}
+
+		})
+	</script>
+
+</html>

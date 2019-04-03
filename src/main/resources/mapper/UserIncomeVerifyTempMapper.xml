@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.btc.mapper.UserIncomeVerifyTempMapper" >
+  <resultMap id="BaseResultMap" type="com.btc.model.UserIncomeVerifyTemp" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="account_id" property="accountId" jdbcType="BIGINT" />
+    <result column="coins" property="coins" jdbcType="DECIMAL" />
+    <result column="coin_income" property="coinIncome" jdbcType="DECIMAL" />
+    <result column="coin_day_rate" property="coinDayRate" jdbcType="DECIMAL" />
+    <result column="coin_year_rate" property="coinYearRate" jdbcType="DECIMAL" />
+    <result column="coin_code" property="coinCode" jdbcType="VARCHAR" />
+    <result column="count_date" property="countDate" jdbcType="DATE" />
+    <result column="usdt_unit" property="usdtUnit" jdbcType="DECIMAL" />
+    <result column="usdt_income" property="usdtIncome" jdbcType="DECIMAL" />
+    <result column="is_system_operate" property="isSystemOperate" jdbcType="INTEGER" />
+    <result column="operate_id" property="operateId" jdbcType="BIGINT" />
+    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+     <result column="user_name" property="userName"  />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, account_id, coins, coin_income, coin_day_rate, coin_year_rate, coin_code, 
+    count_date, usdt_unit, usdt_income, is_system_operate, operate_id, order_no, gmt_create
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from btc_user_income_verify_temp
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from btc_user_income_verify_temp
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.btc.model.UserIncomeVerifyTemp" >
+    insert into btc_user_income_verify_temp (id, user_id, account_id, 
+      coins, coin_income, coin_day_rate, 
+      coin_year_rate, coin_code, count_date, 
+      usdt_unit, usdt_income, is_system_operate, 
+      operate_id, order_no, gmt_create
+      )
+    values (#{id,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{accountId,jdbcType=BIGINT}, 
+      #{coins,jdbcType=DECIMAL}, #{coinIncome,jdbcType=DECIMAL}, #{coinDayRate,jdbcType=DECIMAL}, 
+      #{coinYearRate,jdbcType=DECIMAL}, #{coinCode,jdbcType=VARCHAR}, #{countDate,jdbcType=DATE}, 
+      #{usdtUnit,jdbcType=DECIMAL}, #{usdtIncome,jdbcType=DECIMAL}, #{isSystemOperate,jdbcType=INTEGER}, 
+      #{operateId,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{gmtCreate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.btc.model.UserIncomeVerifyTemp" >
+    insert into btc_user_income_verify_temp
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="accountId != null" >
+        account_id,
+      </if>
+      <if test="coins != null" >
+        coins,
+      </if>
+      <if test="coinIncome != null" >
+        coin_income,
+      </if>
+      <if test="coinDayRate != null" >
+        coin_day_rate,
+      </if>
+      <if test="coinYearRate != null" >
+        coin_year_rate,
+      </if>
+      <if test="coinCode != null" >
+        coin_code,
+      </if>
+      <if test="countDate != null" >
+        count_date,
+      </if>
+      <if test="usdtUnit != null" >
+        usdt_unit,
+      </if>
+      <if test="usdtIncome != null" >
+        usdt_income,
+      </if>
+      <if test="isSystemOperate != null" >
+        is_system_operate,
+      </if>
+      <if test="operateId != null" >
+        operate_id,
+      </if>
+      <if test="orderNo != null" >
+        order_no,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="accountId != null" >
+        #{accountId,jdbcType=BIGINT},
+      </if>
+      <if test="coins != null" >
+        #{coins,jdbcType=DECIMAL},
+      </if>
+      <if test="coinIncome != null" >
+        #{coinIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="coinDayRate != null" >
+        #{coinDayRate,jdbcType=DECIMAL},
+      </if>
+      <if test="coinYearRate != null" >
+        #{coinYearRate,jdbcType=DECIMAL},
+      </if>
+      <if test="coinCode != null" >
+        #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countDate != null" >
+        #{countDate,jdbcType=DATE},
+      </if>
+      <if test="usdtUnit != null" >
+        #{usdtUnit,jdbcType=DECIMAL},
+      </if>
+      <if test="usdtIncome != null" >
+        #{usdtIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="isSystemOperate != null" >
+        #{isSystemOperate,jdbcType=INTEGER},
+      </if>
+      <if test="operateId != null" >
+        #{operateId,jdbcType=BIGINT},
+      </if>
+      <if test="orderNo != null" >
+        #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.btc.model.UserIncomeVerifyTemp" >
+    update btc_user_income_verify_temp
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="accountId != null" >
+        account_id = #{accountId,jdbcType=BIGINT},
+      </if>
+      <if test="coins != null" >
+        coins = #{coins,jdbcType=DECIMAL},
+      </if>
+      <if test="coinIncome != null" >
+        coin_income = #{coinIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="coinDayRate != null" >
+        coin_day_rate = #{coinDayRate,jdbcType=DECIMAL},
+      </if>
+      <if test="coinYearRate != null" >
+        coin_year_rate = #{coinYearRate,jdbcType=DECIMAL},
+      </if>
+      <if test="coinCode != null" >
+        coin_code = #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countDate != null" >
+        count_date = #{countDate,jdbcType=DATE},
+      </if>
+      <if test="usdtUnit != null" >
+        usdt_unit = #{usdtUnit,jdbcType=DECIMAL},
+      </if>
+      <if test="usdtIncome != null" >
+        usdt_income = #{usdtIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="isSystemOperate != null" >
+        is_system_operate = #{isSystemOperate,jdbcType=INTEGER},
+      </if>
+      <if test="operateId != null" >
+        operate_id = #{operateId,jdbcType=BIGINT},
+      </if>
+      <if test="orderNo != null" >
+        order_no = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.btc.model.UserIncomeVerifyTemp" >
+    update btc_user_income_verify_temp
+    set user_id = #{userId,jdbcType=BIGINT},
+      account_id = #{accountId,jdbcType=BIGINT},
+      coins = #{coins,jdbcType=DECIMAL},
+      coin_income = #{coinIncome,jdbcType=DECIMAL},
+      coin_day_rate = #{coinDayRate,jdbcType=DECIMAL},
+      coin_year_rate = #{coinYearRate,jdbcType=DECIMAL},
+      coin_code = #{coinCode,jdbcType=VARCHAR},
+      count_date = #{countDate,jdbcType=DATE},
+      usdt_unit = #{usdtUnit,jdbcType=DECIMAL},
+      usdt_income = #{usdtIncome,jdbcType=DECIMAL},
+      is_system_operate = #{isSystemOperate,jdbcType=INTEGER},
+      operate_id = #{operateId,jdbcType=BIGINT},
+      order_no = #{orderNo,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <insert id="batchInsert" parameterType="java.util.List">
+  
+     insert into btc_user_income_verify_temp (user_id, account_id, 
+      coins, coin_income, coin_day_rate, 
+      coin_year_rate, coin_code, count_date, 
+      usdt_unit, usdt_income, is_system_operate, 
+      operate_id, order_no, gmt_create
+      )
+    values 
+  
+   <foreach collection="list" item="item" index="index" separator=",">
+    ( #{item.userId,jdbcType=BIGINT}, #{item.accountId,jdbcType=BIGINT}, 
+      #{item.coins,jdbcType=DECIMAL}, #{item.coinIncome,jdbcType=DECIMAL}, #{item.coinDayRate,jdbcType=DECIMAL}, 
+      #{item.coinYearRate,jdbcType=DECIMAL}, #{item.coinCode,jdbcType=VARCHAR}, #{item.countDate,jdbcType=DATE}, 
+      #{item.usdtUnit,jdbcType=DECIMAL}, #{item.usdtIncome,jdbcType=DECIMAL}, #{item.isSystemOperate,jdbcType=INTEGER}, 
+      #{item.operateId,jdbcType=BIGINT}, #{item.orderNo,jdbcType=VARCHAR}, #{item.gmtCreate,jdbcType=TIMESTAMP}
+      )
+     </foreach>
+  </insert>
+  
+    <sql id="page_sort_condition">
+		limit #{pageNo},#{pageSize}
+	</sql>
+	<!-- 排序条件 -->
+	<sql id="order_by_condition">
+		<if test="orderBy != '' and  orderBy != null ">
+			ORDER BY ${orderBy} ${order}
+		</if>
+	</sql>
+  
+   <select id="queryUserIncomeVerifyTempRecord" parameterType="java.util.HashMap" resultMap="BaseResultMap">
+			SELECT t.*,u.user_name FROM btc_user_income_verify_temp t,btc_user_info u WHERE t.user_id=u.id
+			<if test="userName !=null and userName !=''">
+				AND u.user_name like '%${userName}%'
+			</if>
+			<if test="coinCode !=null and coinCode !=''">
+				AND t.coin_code like '%${coinCode}%'
+			</if>
+			<if test="beginDate !=null and beginDate!=''">
+				AND date(t.count_date) &gt;=#{beginDate}
+			</if>
+			<if test="endDate !=null and endDate!=''">
+				AND date(t.count_date) &lt;=#{endDate}
+			</if>
+			<if test="orderBy != '' and  orderBy != null ">
+				ORDER BY t.${orderBy} ${order}
+			</if>
+			 <include refid="page_sort_condition"></include>
+	</select>
+	
+	<select id="getUserIncomeVerifyRecordTempCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+			SELECT count(1) FROM btc_user_income_verify_temp t,btc_user_info u WHERE t.user_id=u.id
+			<if test="userName !=null and userName !=''">
+				AND u.user_name like '%${userName}%'
+			</if>
+			<if test="coinCode !=null and coinCode !=''">
+				AND t.coin_code like '%${coinCode}%'
+			</if>
+			<if test="beginDate !=null and beginDate!=''">
+				AND date(t.count_date) &gt;=#{beginDate}
+			</if>
+			<if test="endDate !=null and endDate!=''">
+				AND date(t.count_date) &lt;=#{endDate}
+			</if>
+			<if test="orderBy != '' and  orderBy != null ">
+				ORDER BY t.${orderBy} ${order}
+			</if>
+	</select>
+  
+</mapper>

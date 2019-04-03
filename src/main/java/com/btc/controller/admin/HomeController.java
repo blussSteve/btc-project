@@ -36,6 +36,10 @@ public class HomeController {
 	public String index(){
 		return "index";
 	}
+	@RequestMapping(value="/home")
+	public String home(){
+		return "home";
+	}
 	@RequestMapping(value="/addAdminPage")
 	public String addAdminPage(){
 		return "addAdmin";
@@ -55,9 +59,9 @@ public class HomeController {
 		user.setId(StringUtils.isEmpty(userId)?null:Integer.parseInt(userId));
 		user.setMobile(StringUtils.isEmpty(mobile)?null:mobile);
 		
-		if(StringUtils.isEmpty(isLocked)||isLocked.equals("2")){
+		if(StringUtils.isEmpty(isLocked)){
 			
-			user.setIsLocked(2);
+			user.setIsLocked(null);
 		}else{
 			user.setIsLocked(Integer.parseInt(isLocked));
 		}

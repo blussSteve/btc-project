@@ -351,8 +351,6 @@ public class DateUtil {
         
         Date d=DateUtils.addDays(new Date(), -7);
         
-       String dd= com.xiaoleilu.hutool.date.DateUtil.format(d, "yyyyMMdd");
-       System.out.println(dd);
     }
 }
 

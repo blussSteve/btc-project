@@ -111,12 +111,12 @@
 								<div class="col-sm-8">
 									<div class="radio">
 										<label>
-											<input type="radio" name="status" value="0" checked="checked">启用
+											<input type="radio" name="status" value="1" checked="checked">启用
 										</label>
 									</div>
 									<div class="radio">
 										<label>
-											<input type="radio" name="status" value="1">禁用
+											<input type="radio" name="status" value="0">禁用
 										</label>
 									</div>
 								</div>
@@ -174,7 +174,7 @@
 									</div>
 									<div class="radio">
 										<label>
-									<input type="radio" name="status" value="2"/>禁用
+									<input type="radio" name="status" value="0"/>禁用
 								</label>
 									</div>
 								</div>
@@ -254,7 +254,7 @@
 								$("#validate-father-form").data('bootstrapValidator').destroy();
 								$('#validate-father-form').data('bootstrapValidator', null);
 								fatherFormValidator();
-								$("#validate-father-form input").val("");
+								$("#validate-father-form input:text").val("");
 								$('#data-father-modal').modal('hide');
 
 								//刷新数据
@@ -278,7 +278,7 @@
 				$("#validate-father-form").data('bootstrapValidator').destroy();
 				$('#validate-father-form').data('bootstrapValidator', null);
 				fatherFormValidator();
-				$("#validate-father-form input").val("");
+				$("#validate-father-form input:text").val("");
 				$('#data-father-modal').modal('hide');
 			})
 
@@ -339,7 +339,7 @@
 								$("#validate-child-form").data('bootstrapValidator').destroy();
 								$('#validate-child-form').data('bootstrapValidator', null);
 								childFormValidator();
-								$("#validate-child-form input").val("");
+								$("#validate-child-form input:text").val("");
 								$('#data-child-modal').modal('hide');
 
 								//刷新数据
@@ -364,7 +364,7 @@
 				$("#validate-child-form").data('bootstrapValidator').destroy();
 				$('#validate-child-form').data('bootstrapValidator', null);
 				childFormValidator();
-				$("#validate-child-form input").val("");
+				$("#validate-child-form input:text").val("");
 				$('#data-child-modal').modal('hide');
 			})
 
@@ -508,13 +508,11 @@
 							contentType: false,
 							success: function(data) {
 								if("0000" == data.code) {
-									alert("成功");
 									//关闭模态框
 									//移除上一次的校验结果，重新添加表单校验。
 									$("#validate-father-form").data('bootstrapValidator').destroy();
 									$('#validate-father-form').data('bootstrapValidator', null);
 									fatherFormValidator();
-									$("#validate-father-form input").val("");
 									$('#data-father-modal').modal('hide');
 
 									//刷新数据
@@ -688,13 +686,11 @@
 							contentType: false,
 							success: function(data) {
 								if("0000" == data.code) {
-									alert("成功");
 									//关闭模态框
 									//移除上一次的校验结果，重新添加表单校验。
 									$("#validate-child-form").data('bootstrapValidator').destroy();
 									$('#validate-child-form').data('bootstrapValidator', null);
 									childFormValidator();
-									$("#validate-child-form input").val("");
 									$('#data-child-modal').modal('hide');
 
 									//刷新数据
@@ -769,7 +765,7 @@
 							message: '菜单名称验证错误',
 							validators: {
 								notEmpty: {
-									message: '用户名不能为空'
+									message: '菜单不能为空'
 								}
 							}
 						},

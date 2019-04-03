@@ -16,13 +16,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
-import com.btc.global.auth.AuthUser;
-import com.btc.global.auth.TokenUtil;
 import com.btc.global.json.JsonResult;
 import com.btc.global.json.JsonResultHelp;
 import com.btc.global.json.enums.RspCodeEnum;
 import com.btc.service.RedisService;
 import com.btc.util.Constants;
+import com.btc.util.DataCacheUtil;
 
 /**
  * Created by Think on 2017/8/27.
@@ -97,21 +96,11 @@ public class SecureCheckFilter extends OncePerRequestFilter {
     }
     
     private boolean verifyCacheToken(String token){
-    	boolean flag=TokenUtil.verifyToken(token);
-    	if(!flag)
-    		return false;
-    	AuthUser auth=TokenUtil.getAuth(token);
-    	if(null==auth.getUserId()){
-    		return false;
+    	
+    	if(null!=DataCacheUtil.getUserInfo(token)){
+    		return true;
     	}
-//    	UserInfo ucv=DataCacheUtil.getUserInfo(auth.getUserId());
-//    	if(ucv==null){
-//    		return false;
-//    	}
-//    	String cacheToken=ucv.getToken();
-//    	if(!cacheToken.equals(token)){
-//    		return false;
-//    	}
-    	return true;
+    	return false;
+    	
     }
 }

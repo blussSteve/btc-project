@@ -34,16 +34,15 @@
 	     <if test="id !=null and id!=''">
 	     	AND id=#{id}
 	     </if>
-	     <if test="userName !=null and userName!=''">
+	     <if test="userName !=null and userName !=''">
 	     	ADN user_name like '%${userName}%'
 	     </if>
-	     <if test="mobile !=null and mobile!=''">
+	     <if test="mobile !=null and mobile !=''">
 	     	AND mobile like '%${mobile}%'
 	     </if>
-	     <if test="isLocked !=2">
+	     <if test="isLocked !=-1">
 	     	AND is_locked =#{isLocked}
 	     </if>
-	     AND level!=3
 	</sql>
 	<select id="listAdmin" resultMap="tableMap">
 		 SELECT id,user_name,PASSWORD,is_expired,is_locked,mobile,fullname,last_login_time,create_time,level FROM u_user self

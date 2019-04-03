@@ -86,6 +86,7 @@
 	<delete id="delItem" parameterType="java.lang.Long">
 		DELETE t FROM system_first_item t WHERE t.id=#{arg0};
 		DELETE t FROM system_second_item t WHERE t.first_id=#{arg0};
+		DELETE t FROM u_user_role t WHERE t.first_item_id=#{arg0};
 	</delete>
 
 </mapper>

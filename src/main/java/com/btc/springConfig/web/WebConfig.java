@@ -38,18 +38,18 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public FilterRegistrationBean filterRegistrationBean(SecureCheckFilter myFilter){  
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();  
         filterRegistrationBean.setFilter(myFilter);  
-        filterRegistrationBean.setEnabled(false); //是否过滤
+        filterRegistrationBean.setEnabled(true); //是否过滤
         filterRegistrationBean.addUrlPatterns("/front/auth/*");  
         return filterRegistrationBean;  
     }
 	 
 
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(securityInterceptor).
-//        addPathPatterns("/admin/**").
-//        excludePathPatterns("/admin/login/**");//配置登录拦截器拦截路径
-//    }
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(securityInterceptor).
+        addPathPatterns("/admin/**").
+        excludePathPatterns("/admin/login/**");//配置登录拦截器拦截路径
+    }
     /**
      * 文件上传配置
      *
@@ -92,10 +92,12 @@ public class WebConfig extends WebMvcConfigurerAdapter {
      */
     @Override  
     public void addCorsMappings(CorsRegistry registry) {  
-        registry.addMapping("/**")  
+        registry.addMapping("/**")
+        		.allowedMethods("*")
                 .allowedOrigins("*")  
                 .allowCredentials(true)  
                 .allowedMethods("GET", "POST", "DELETE", "PUT")  
                 .maxAge(3600);  
     } 
+    
 }

@@ -74,7 +74,7 @@
 								<select class="form-control" id="search-isLocked" style="width: 100px;">
 									<option value="0">启用</option>
 									<option value="1">禁用</option>
-									<option value="2" selected="selected">全部</option>
+									<option value="-1" selected="selected">全部</option>
 								</select>
 							</div>
 						</form>
@@ -242,7 +242,7 @@
 								$("#validate-user-form").data('bootstrapValidator').destroy();
 								$('#validate-user-form').data('bootstrapValidator', null);
 								formValidator();
-								$("#validate-user-form input").val("");
+								$("#validate-form input:text").val("");
 								$('#data-modal').modal('hide');
 								//刷新数据
 								$table.bootstrapTable('refresh');
@@ -265,7 +265,7 @@
 				$("#validate-user-form").data('bootstrapValidator').destroy();
 				$("#validate-user-form").data('bootstrapValidator', null);
 				formValidator();
-				$("#validate-user-form input").val("");
+				$("#validate-form input:text").val("");
 				$('#data-modal').modal('hide');
 			})
 
@@ -569,7 +569,9 @@
 			
 			//权限设置
 			
+			var treeUserId;
 			function initTree(userId){
+				treeUserId=userId;
 				var nodes = new Array();
 					$.ajax({
 						type: "post",
@@ -620,7 +622,7 @@
 			}
 
 			$("#save-role").click(function() {
-				var userId= $table.bootstrapTable('getSelections')[0].id;
+				var userId= treeUserId;
 				var treeObj = $.fn.zTree.getZTreeObj("tree");
 				var nodes = treeObj.getCheckedNodes(true);
 
@@ -647,7 +649,7 @@
 						if(result.code == "0000") {
 							alert("成功");
 							$.fn.zTree.destroy("tree");
-							initTree(userId);
+							$('#role-modal').modal('hide');
 						}
 					}
 				});

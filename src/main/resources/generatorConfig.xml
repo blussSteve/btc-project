@@ -8,7 +8,7 @@
 
 		<commentGenerator>
 			<!--是否取消注释（默认false），一定要保留@mbggenerated,MBG通过该字符串来判断代码是否为代码生成器生成的代码， 有该标记的的代码在重新生成的时候会被删除，不会重复。不会在XML中出现重复元素。 -->
-			<property name="suppressAllComments" value="false" />
+			<property name="suppressAllComments" value="true" />
 
 			<!--是否生成注释代时间戳（默认false），建议设为true，避免重复提交 -->
 			<property name="suppressDate" value="true" />
@@ -37,7 +37,7 @@
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		</table> -->
 		
-		<table tableName="system_first_item" domainObjectName="SystemFirstItem" enableCountByExample="false"
+		<!-- <table tableName="system_first_item" domainObjectName="SystemFirstItem" enableCountByExample="false"
 		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		</table>
@@ -45,9 +45,79 @@
 		<table tableName="system_second_item" domainObjectName="SystemSecondItem" enableCountByExample="false"
 		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
-		</table>
+		</table> -->
 		
+		<!-- 	<table tableName="sys_coins_dic" domainObjectName="SysCoinsDic" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table> -->
+		
+		<!-- <table tableName="btc_coin_rate_record" domainObjectName="CoinRateRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table>
+		 -->
+		<!-- <table tableName="btc_coin_record" domainObjectName="CoinRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table>
+		-->
+		<!-- <table tableName="btc_user_income_record" domainObjectName="UserIncomeRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table> 
+		
+		
+		
+		<table tableName="btc_user_income_verify_temp" domainObjectName="UserIncomeVerifyTemp" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table>  --> 
 
+	<!-- 	<table tableName="btc_account_back" domainObjectName="AccountBack" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> 
+	   <table tableName="btc_account" domainObjectName="Account" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table>   -->
+		<!-- 
+		<table tableName="sys_task_job" domainObjectName="sysTaskJob" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table>
+		<table tableName="btc_user_info" domainObjectName="userInfo" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table> -->
+		<!--   <table tableName="btc_user_income_verify" domainObjectName="UserIncomeVerify" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table> -->
+		<!-- 
+			  <table tableName="btc_coin_record" domainObjectName="CoinRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> -->
+	<!-- 	<table tableName="btc_asset_income_record" domainObjectName="AssetIncomeRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> 
+		<table tableName="btc_asset_total" domainObjectName="AssetTotal" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> -->
+<table tableName="btc_user_day_total_coin_record" domainObjectName="UserDayTotalCoinRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table>
 
 		<!-- maven 启动指令 mybatis-generator:generate -->
 	</context>
