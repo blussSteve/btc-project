@@ -5,7 +5,8 @@ public enum ImgTypeEnum {
 	GIF(2,"gif"),
 	JPEG(3,"jpeg"),
 	PNG(4,"png"), 
-	MBP(5,"bmp");
+	MBP(5,"bmp"),
+	SVG(6,"svg");
 	
 	
 	private int num;
@@ -30,6 +31,16 @@ public enum ImgTypeEnum {
 		return flag;
 	}
 	
+	public static ImgTypeEnum getImgTypeEnum(String type){
+		for(ImgTypeEnum enums:ImgTypeEnum.values()){
+			
+			if(enums.getCode().toUpperCase().equals(type.toUpperCase())){
+				 return enums;
+			}
+		}
+		
+		return ImgTypeEnum.JPG;
+	}
 	
 	public int getNum() {
 		return num;

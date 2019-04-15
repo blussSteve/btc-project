@@ -15,7 +15,50 @@
     <result column="count_date" property="countDate" jdbcType="DATE" />
     <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
     <result column="gmt_modify" property="gmtModify" jdbcType="TIMESTAMP" />
+      <result column="open_id" property="openId" />
+    <result column="user_name" property="userName" />
   </resultMap>
+  <sql id="page_sort_condition">
+		limit #{pageNo},#{pageSize}
+	</sql>
+	<!-- 排序条件 -->
+	<sql id="order_by_condition">
+		<if test="orderBy != '' and  orderBy != null ">
+			ORDER BY t.${orderBy} ${order}
+		</if>
+	</sql>
+	<sql id="search_condition">
+		WHERE t.user_id=u.id 
+		<if test="userId !=null and userId !=''">
+			AND t.user_id =#{userId}
+		</if>
+		<if test="countDate !=null">
+			AND t.count_date = #{countDate,jdbcType=DATE}
+		</if>
+		<if test="coinCode !=null and coinCode !=''">
+			AND t.coin_code= #{coinCode}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.user_name like '%${userName}%'
+		</if>
+		<if test="openId !=null and openId !=''">
+			AND u.open_id =#{openId}
+		</if>
+		
+		
+	</sql>
+	 <select id="queryAccountHis" parameterType="java.util.HashMap"
+		resultMap="BaseResultMap">
+		SELECT t.*,u.open_id,u.user_name FROM btc_account_back t ,btc_user_info u 
+		<include refid="search_condition" />
+		<include refid="order_by_condition" />
+		<include refid="page_sort_condition" />
+	</select>
+	<select id="getAccountHisCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT count(1) FROM btc_account_back t ,btc_user_info u
+		<include refid="search_condition" />
+	</select>
+	
   <sql id="Base_Column_List" >
     id, account_id, user_id, coins, can_use_coins, coin_code, today_coins, today_income, 
     total_income, status, count_date, gmt_create, gmt_modify

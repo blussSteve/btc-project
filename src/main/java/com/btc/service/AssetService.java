@@ -29,5 +29,7 @@ public interface AssetService {
 
 	JsonResult clearAccountAsset(long userId, long accountId);
 
+	JsonResult countCanUseAsset();
+
 }
  

@@ -1,5 +1,7 @@
 package com.btc.controller;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,11 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.btc.global.enums.ImgTypeEnum;
 import com.btc.global.json.JsonResult;
 import com.btc.global.json.JsonResultHelp;
 import com.btc.global.json.enums.RspCodeEnum;
-import com.btc.util.ImageUtil;
+import com.btc.util.FileUtil;
 import com.btc.util.StringUtil;
 
 @RequestMapping("/front/noAuth/")
@@ -22,46 +23,26 @@ import com.btc.util.StringUtil;
 public class NoAuthController {
 
 	@Autowired
-	private ImageUtil imageUtil;
+	private FileUtil fileUtil;
 	
-	private final static String DOWN_IMG_PATH_REQ = "/downImg/{fileName:.+}";
-
-	/**
-	 * 图片下载
-	 * 
-	 * @param req
-	 * @param rsp
-	 * @return
-	 */
-	@RequestMapping(value = DOWN_IMG_PATH_REQ)
-	public void downImg(@PathVariable("fileName") String fileName,	HttpServletRequest req, HttpServletResponse rsp) {
-		imageUtil.getOutputStream(fileName, rsp);
+	@RequestMapping("/uploadFile")
+	public JsonResult uploadFile(MultipartHttpServletRequest req){
+		 MultipartFile file= ((MultipartHttpServletRequest) req).getFile("file");
+		 if(file.isEmpty()){
+			 return JsonResultHelp.buildFail(RspCodeEnum.$1102);
+		 }
+		 
+		 String fileUrl=fileUtil.uploadFile(file);
+		 if(StringUtil.isEmpty(fileUrl)){
+			 return JsonResultHelp.buildFail(RspCodeEnum.$1100);
+		 }
+		return JsonResultHelp.buildSucc(fileUrl);
 	}
 	
-	private final static String UPLOAD_IMG_REQ="/uploadImg";
 	
-	/**
-	 * 图片上传
-	 * @param req 
-	 * @return
-	 */
-	@RequestMapping(value=UPLOAD_IMG_REQ)
-	public JsonResult uploadImg(MultipartHttpServletRequest req){
-		 MultipartFile file= ((MultipartHttpServletRequest) req).getFile("file");
-		 if(!file.isEmpty()){
-			 
-			 int uploadImgType=StringUtil.isEmpty(req.getParameter("imgType"))?0:Integer.parseInt(req.getParameter("imgType"));
-		     String fileOrgName=file.getOriginalFilename();
-		     String type=fileOrgName.substring(fileOrgName.lastIndexOf(".") + 1, fileOrgName.length());
-		     
-		     if(!ImgTypeEnum.isImg(type)){
-		    	 return  JsonResultHelp.buildFail(RspCodeEnum.$1101);
-		     }
-		    String path=  imageUtil.saveHeadImg(file,uploadImgType);
-		    return JsonResultHelp.buildSucc(path);
-		 }
-		 return JsonResultHelp.buildSucc();
-		
+	@RequestMapping("/downFile/{fileName:.+}")
+	public void downFile(@PathVariable("fileName") String fileName,HttpServletRequest req, HttpServletResponse rsp) throws IOException{
+		fileUtil.downFile(fileName, req, rsp);
 	}
 	
 }

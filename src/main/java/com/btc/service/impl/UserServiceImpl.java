@@ -32,6 +32,7 @@ import com.btc.lbank.bean.LbankTrade;
 import com.btc.lbank.bean.LbankUserInfo;
 import com.btc.lbank.util.LbankResult;
 import com.btc.lbank.util.LbankUtil;
+import com.btc.mapper.AccountBackMapper;
 import com.btc.mapper.AccountMapper;
 import com.btc.mapper.CoinRecordMapper;
 import com.btc.mapper.SysTaskJobMapper;
@@ -40,6 +41,7 @@ import com.btc.mapper.UserIncomeRecordMapper;
 import com.btc.mapper.UserInfoMapper;
 import com.btc.mapper.admin.SysCoinsDicMapper;
 import com.btc.model.Account;
+import com.btc.model.AccountBack;
 import com.btc.model.CoinRecord;
 import com.btc.model.UserDayTotalCoinRecord;
 import com.btc.model.UserIncomeRecord;
@@ -88,6 +90,8 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	private SysTaskJobMapper sysTaskJobMapper;
 	
+	@Autowired
+	private AccountBackMapper accountBackMapper;
 	/**
 	 * 用户信息
 	 */
@@ -133,6 +137,36 @@ public class UserServiceImpl implements UserService{
 		 	page.setRows(list);
 		 	page.setTotal(count);
 		 	return page;
+	}
+	
+	/**
+	 * 账户信息
+	 */
+	@Override
+	public Page<AccountBack> queryAccountHisInfo(Page<AccountBack> page,AccountBack obj){
+		
+		 Map<String,Object> params= ObjectUtil.bean2Map(obj);
+		 
+		 	if(!StringUtils.isEmpty(page.getOrderBy())){
+				params.put("orderBy", page.getOrderBy());
+				params.put("order", page.getOrder());
+			}else{
+				params.put("orderBy", "id");
+				params.put("order", "desc");
+			}
+		 	params=PageUtil.parsePage(params, page);
+			 
+		 	List<AccountBack> list=accountBackMapper.queryAccountHis(params);
+		 	int count=accountBackMapper.getAccountHisCount(params);
+		 	page.setRows(list);
+		 	page.setTotal(count);
+		 	return page;
+	}
+	
+	@Override
+	@Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_S30,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
+	public JsonResult queryAllAsset(){ 
+		return JsonResultHelp.buildSucc(accountMapper.queryAllAsset());
 	}
 	
 	/**
@@ -414,10 +448,10 @@ public class UserServiceImpl implements UserService{
 				
 				if(superlusAmount.compareTo(BigDecimal.ZERO)==1){
 					
-					//判断是否以及计算今日收益
+					//判断是否以及计算可用资产
 					String dateStr=new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 					
-					boolean flag=sysTaskJobMapper.checkJobIsRun(JobTypeEnum.COUNT_INCOME.getCode(), dateStr);
+					boolean flag=sysTaskJobMapper.checkJobIsRun(JobTypeEnum.COUNT_USE_COINS.getCode(), dateStr);
 					
 					if(!flag){
 						
@@ -545,23 +579,58 @@ public class UserServiceImpl implements UserService{
 			
 		}
 		if(totalAsset.compareTo(BigDecimal.ZERO)==1){
-			yearRate=yesterdayIncome.divide(totalAsset).multiply(new BigDecimal(365));
+			yearRate=yesterdayIncome.divide(totalAsset,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(365));
 		}
 		
 	
 		
 		//最近7天收益k线
-		List<Map<String,String>> kline=userIncomeRecordMapper.queryUserCoinUsdtIncomeLine(userId, -7);
+		List<Map<String,String>> kline=userIncomeRecordMapper.queryUserCoinUsdtIncomeLine(userId, -30);
 		
 		map.put("yesterdayIncome", yesterdayIncome.setScale(4, BigDecimal.ROUND_DOWN));
 		map.put("totalIncome", totalIncome.setScale(4, BigDecimal.ROUND_DOWN));
 		map.put("yearRate", yearRate.multiply(new BigDecimal(365)).setScale(4, BigDecimal.ROUND_DOWN));
 		map.put("totalAsset",totalAsset.setScale(4, BigDecimal.ROUND_DOWN));
 		map.put("allAsset",allAsset.setScale(4, BigDecimal.ROUND_DOWN));
-		map.put("kline", kline);
+		if(allAsset.compareTo(BigDecimal.ZERO)==0){
+			map.put("percent", 100);
+		}else{
+			map.put("percent", totalAsset.divide(allAsset,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_DOWN));
+		}
+		
+		map.put("kline", formateKlin(kline,30));
 		
 		return JsonResultHelp.buildSucc(map);
 		
+	}
+	
+	private List<Map<String,String>> formateKlin(List<Map<String,String>> list,int day){
+		
+		Date date=new Date();
+		SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd");
+		List<String> listDate=Lists.newArrayList();
+		for(int i=day;i>0;i--){
+			listDate.add(format.format(DateUtils.addDays(date,-i )));
+		}
+		
+		Map<String,Map<String,String>> kmap=Maps.newTreeMap();
+		for(Map<String,String> map:list){
+			kmap.put(map.get("date"), map);
+		}
+		
+		List<Map<String,String>> newListKline=Lists.newArrayList();
+		
+		for(String dateStr:listDate){
+			Map<String,String> m=Maps.newHashMap();
+			if(null==kmap.get(dateStr)){
+				m.put("date", dateStr);
+				m.put("data", "0.00");
+			}else{
+				m=kmap.get(dateStr);
+			}
+			newListKline.add(m);
+		}
+		return newListKline;
 	}
 	
 	/**
@@ -600,6 +669,20 @@ public class UserServiceImpl implements UserService{
 			map.put("totalIncome", "0");
 			map.put("kline", "");
 			
+			if(!lbankUtil.checkTokenIsValid(ltoken.getAccess_token(), ltoken.getOpen_id()).isSuccess()){
+				//刷新token
+				LbankResult<LbankToken> refresh=lbankUtil.refreshToken(ltoken.getRefresh_token());
+				if(!refresh.isFullSuccess()){
+					return JsonResultHelp.buildFail(RspCodeEnum.$2601,refresh.getMsg());
+				}
+				
+				ltoken.setAccess_token(refresh.getObj().getAccess_token());
+				ltoken.setRefresh_token(refresh.getObj().getRefresh_token());
+				
+				redisService.set(Constants.LBANK_TOKEN_CACHE+ltoken.getOpen_id(), JSON.toJSONString(ltoken),Constants.LBANK_TOKEN_TIME_CACHE);
+
+			}
+			
 			LbankResult<String> lresult=lbankUtil.queryBalance(user.getOpenId(), ltoken.getAccess_token(),dic.getCoinCode());
 			if(lresult.isFullSuccess()){
 				map.put("totalCoin",lresult.getObj());
@@ -614,28 +697,49 @@ public class UserServiceImpl implements UserService{
 			
 			//最近7天收益
 			List<UserIncomeRecord> listUserIncomeRecord= userIncomeRecordMapper.queryUserCoinIncomeLine(userId, dic.getCoinCode(), -7);
-		
-			if(null!=listUserIncomeRecord&&listUserIncomeRecord.size()>0){
-				
-				List<Map<String,String>> listk=Lists.newArrayList();
-				for(UserIncomeRecord income:listUserIncomeRecord){
-					Map<String,String> kmap=Maps.newHashMap();
-				
-					String  date=new SimpleDateFormat("yyyy-MM-dd").format(income.getGmtCreate());
-					kmap.put("date", date);
-					kmap.put("data", income.getCoinIncome().doubleValue()+"");
-					listk.add(kmap);
-				}
-			
-				map.put("kline", listk);
-			}
-			
+			List<Map<String,String>> listk=formateCoinKlin(listUserIncomeRecord, 7);
+			map.put("kline", listk);
 			listAsset.add(map);
 		}
 		
 		return JsonResultHelp.buildSucc(listAsset);
 		
 	}
+	
+	
+private List<Map<String,String>> formateCoinKlin(List<UserIncomeRecord>  list,int day){
+		
+		Date date=new Date();
+		SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd");
+		List<String> listDate=Lists.newArrayList();
+		for(int i=day;i>0;i--){
+			listDate.add(format.format(DateUtils.addDays(date,-i )));
+		}
+		
+		Map<String,String> kmap=Maps.newTreeMap();
+		for(UserIncomeRecord bean:list){
+			
+			String  date1=new SimpleDateFormat("yyyy-MM-dd").format(bean.getGmtCreate());
+			kmap.put("date", date1+"");
+			kmap.put("data", bean.getCoinIncome().doubleValue()+"");
+			
+		}
+		
+		List<Map<String,String>> newListKline=Lists.newArrayList();
+		
+		for(String dateStr:listDate){
+			Map<String,String> m=Maps.newHashMap();
+			m.put("date", dateStr);
+			if(null==kmap.get(dateStr)){
+				m.put("data", "0.00");
+			}else{
+				m.put("data", kmap.get(dateStr));
+			}
+			newListKline.add(m);
+		}
+		return newListKline;
+	}
+
 	
 	/**
 	 * 资金流水

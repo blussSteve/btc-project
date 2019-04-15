@@ -13,6 +13,9 @@
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
     <result column="gmt_modify" property="gmtModify" jdbcType="TIMESTAMP" />
+    <result column="open_id" property="openId" />
+    <result column="user_name" property="userName" />
+    
   </resultMap>
    <sql id="page_sort_condition">
 		limit #{pageNo},#{pageSize}
@@ -20,31 +23,33 @@
 	<!-- 排序条件 -->
 	<sql id="order_by_condition">
 		<if test="orderBy != '' and  orderBy != null ">
-			ORDER BY ${orderBy} ${order}
+			ORDER BY t.${orderBy} ${order}
 		</if>
 	</sql>
 	<sql id="search_condition">
-		where 1=1
+		WHERE t.user_id=u.id 
 		<if test="userId !=null and userId !=''">
-			AND user_id =#{userId}
+			AND t.user_id =#{userId}
 		</if>
 		<if test="coinCode !=null and coinCode !=''">
-			AND coin_code #{coinCode}
+			AND t.coin_code= #{coinCode}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.user_name like '%${userName}%'
+		</if>
+		<if test="openId !=null and openId !=''">
+			AND u.open_id =#{openId}
 		</if>
 	</sql>
 	 <select id="queryAccount" parameterType="java.util.HashMap"
 		resultMap="BaseResultMap">
-		select
-		<include refid="Base_Column_List" />
-		from btc_account
+		SELECT t.*,u.open_id,u.user_name FROM btc_account t ,btc_user_info u 
 		<include refid="search_condition" />
 		<include refid="order_by_condition" />
 		<include refid="page_sort_condition" />
 	</select>
 	<select id="getAccountCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
-		select
-		count(1)
-		from btc_account
+		SELECT count(1) FROM btc_account t ,btc_user_info u
 		<include refid="search_condition" />
 	</select>
   <sql id="Base_Column_List" >
@@ -204,4 +209,42 @@
      UPDATE btc_account t SET t.coins=t.coins+#{item.todayIncome},t.can_use_coins=#{item.canUseCoins},t.today_income=#{item.todayIncome},t.total_income=#{item.totalIncome} WHERE t.id=#{item.id}
      </foreach>
   </update>
+  <select id="queryAllAsset" resultType="java.util.HashMap">
+	 
+SELECT 
+  s.coin_code AS coinCode,
+  IF(
+    m.totalCoins IS NULL,
+    0,
+    m.totalCoins
+  ) AS totalCoins,
+  IF(
+    m.totalCountCoins IS NULL,
+    0,
+    m.totalCountCoins
+  ) AS totalCountCoins,
+  IF(
+    m.totalTodayIncome IS NULL,
+    0,
+    m.totalTodayIncome
+  ) AS totalTodayIncome,
+  IF(
+    m.totalIncome IS NULL,
+    0,
+    m.totalIncome
+  ) AS totalIncome 
+FROM
+  sys_coins_dic s 
+  LEFT JOIN 
+    (SELECT 
+      t.coin_code AS coinCode,
+      SUM(t.coins) AS totalCoins,
+      SUM(t.can_use_coins) AS totalCountCoins,
+      SUM(t.today_income) AS totalTodayIncome,
+      SUM(t.total_income) AS totalIncome 
+    FROM
+      btc_account t 
+    GROUP BY t.coin_code) m 
+    ON s.coin_code = m.coinCode 
+  </select>
 </mapper>

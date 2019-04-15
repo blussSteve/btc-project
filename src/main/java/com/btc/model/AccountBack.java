@@ -29,6 +29,11 @@ public class AccountBack {
     private Date gmtCreate;
 
     private Date gmtModify;
+    
+    private String openId;
+    
+    private String userName;
+
 
     public Long getId() {
         return id;
@@ -133,4 +138,21 @@ public class AccountBack {
     public void setGmtModify(Date gmtModify) {
         this.gmtModify = gmtModify;
     }
+
+	public String getOpenId() {
+		return openId;
+	}
+
+	public void setOpenId(String openId) {
+		this.openId = openId;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+    
 }

@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import com.btc.model.Account;
+import com.btc.model.AccountBack;
 
 public interface AccountMapper {
     int deleteByPrimaryKey(Long id);
@@ -35,6 +36,7 @@ public interface AccountMapper {
     List<Account> queryAccount(Map<String,Object> params);
     
     int getAccountCount(Map<String,Object> params);
+     
     
     @Select("SELECT * FROM btc_account t WHERE t.user_id=#{arg0}")
     @ResultMap("BaseResultMap")
@@ -50,7 +52,7 @@ public interface AccountMapper {
     @Update("UPDATE btc_account t SET t.coins=t.coins-#{arg0} WHERE t.id=#{arg1}")
     int updateAccountSub(String amount,long accountId);
     
-    @Update("UPDATE btc_account t SET t.status=#{arg0} WHERE t.id=#{arg1}")
+    @Update("UPDATE btc_account t SET t.status=#{arg1} WHERE t.id=#{arg0}")
     int updateAccountStatus(long accountId,int status);
     
     @Update("UPDATE btc_account t SET t.coins=0,t.can_use_coins=0 WHERE t.id=#{arg0}")
@@ -64,4 +66,7 @@ public interface AccountMapper {
     
     @Update("UPDATE btc_account t SET t.coins=0,t.today_income=0,t.can_use_coins=0,t.today_coins=0 WHERE t.id=#{arg0}")
     int clearAccountAsset(long accountId);
+    
+    List<Map<String,String>> queryAllAsset();
+    
 }

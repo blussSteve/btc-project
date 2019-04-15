@@ -232,15 +232,12 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	@Transactional
 	public JsonResult createUserIncomeVerifyTemp(int isSystemOperate,long operateId) {
-		Date beginDate=new Date();
 		
 		try {
 			 if(RedissonManager.lock(Constants.COUNT_INCOME_KEY, 30, TimeUnit.SECONDS)){
 				Date date=new Date();
 				String dateStr=new SimpleDateFormat("yyyy-MM-dd").format(date);
-				
 				//判断是否以及计算今日收益
-				
 				boolean flag=sysTaskJobMapper.checkJobIsRun(JobTypeEnum.COUNT_INCOME.getCode(), dateStr);
 				
 				if(flag){
@@ -282,7 +279,7 @@ public class AssetServiceImpl implements AssetService {
 				 List<CoinRateRecord> listCoinRateRecord=coinRateRecordMapper.queryCoinRateByDate(dateStr);
 				 
 				 if(listCoinRateRecord==null||listCoinRateRecord.size()<=0){
-					 
+					 sysTaskJobMapper.insert(new SysTaskJob(date,new Date(),JobTypeEnum.COUNT_INCOME.getCode(),YesOrNoEnum.NO.getCode(), "暂未配置今天收益率信息"));
 					 return JsonResultHelp.buildFail(RspCodeEnum.$2303);
 					 
 				 }
@@ -294,9 +291,6 @@ public class AssetServiceImpl implements AssetService {
 					 coinRateRecordMap.put(bean.getCoinCode(), bean);
 				 }
 				
-				//获取昨日充值数据
-				
-				 List<UserDayTotalCoinRecord> listUserDayTotalCoinRecord= userDayTotalCoinRecordMapper.queryUserDayTotalCoinRecord(DateUtils.addDays(new Date(), -1));
 				
 				//获取所有用户数据
 				 
@@ -307,26 +301,27 @@ public class AssetServiceImpl implements AssetService {
 					 accountMap.put(bean.getUserId()+":"+bean.getId()+":"+bean.getCoinCode(), bean);
 				 }
 				 
-				 //更新用户计息资产=(昨日投资资产+历史计息资产)
-				 
-				 for(UserDayTotalCoinRecord bean:listUserDayTotalCoinRecord){
-					 String key=bean.getUserId()+":"+bean.getAccountId()+":"+bean.getCoinCode();
-					 Account account= accountMap.get(key);
-					 if(null!=account){
-						 //计算新的计息资产
-						 account.setCanUseCoins(bean.getCoins().subtract(bean.getCostAmount()).add(account.getCanUseCoins()));
-						 account.setTodayCoins(account.getCanUseCoins());
-						 accountMap.put(key, account);
-					 }
-				 }
 				 //计算收益
 				List<UserIncomeVerifyTemp> listTemp=Lists.newArrayList();
 				 
 				 for(String key:accountMap.keySet()){
 					 
+					 
 					 Account bean=accountMap.get(key);
 					 
+					 if(bean.getCanUseCoins().compareTo(BigDecimal.ZERO)<1){
+						 continue;
+					 }
+					 
 					 CoinRateRecord config= coinRateRecordMap.get(bean.getCoinCode());
+					 
+					 if(null==config){
+						 config=new CoinRateRecord();
+						 config.setCoinDayRate(BigDecimal.ZERO);
+						 config.setCoinYearRate(BigDecimal.ZERO);
+						 config.setUsdtUnit(BigDecimal.ZERO);
+						 
+					 }
 					 
 					 UserIncomeVerifyTemp temp=new UserIncomeVerifyTemp();
 					 temp.setUserId(bean.getUserId());
@@ -604,13 +599,12 @@ public class AssetServiceImpl implements AssetService {
 					 accountBackMapper.batchInsert(listAccountBack);
 					 listAccountBack.clear();
 				 }
-				 sysTaskJobMapper.insert(new SysTaskJob(beginDate,new Date(),JobTypeEnum.COUNT_INCOME.getCode(),YesOrNoEnum.YES.getCode(),""));
+				
 				 return JsonResultHelp.buildSucc();
 			}
 			 	return JsonResultHelp.buildFail(RspCodeEnum.$0005);
 			} catch (Exception e) {
 				
-				sysTaskJobMapper.insert(new SysTaskJob(beginDate,new Date(),JobTypeEnum.COUNT_INCOME.getCode(),YesOrNoEnum.NO.getCode(), e.getMessage()));
 				e.printStackTrace();
 				logger.error(""+e);
 				throw new RuntimeException("系统异常>>>"+e);
@@ -624,236 +618,255 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	@Transactional
 	public JsonResult commitUserIncomeVerifyTemp(long userId){
-		
-		//检测是否有数据
-		int count=userIncomeVerifyTempMapper.getUserIncomeVerifyTempCount(new Date());
-		
-		if(count<=0){
-			userIncomeVerifyTempMapper.truncateUserIncomeVerifyTemp();
-			return JsonResultHelp.buildFail(RspCodeEnum.$2302);
-		}
-		
-		
-		Date date=new Date();
-		
-		 List<AccountBack> listAccount =accountBackMapper.queryAll(date);
-		//获取昨日充值数据
-		
-		 Map<String,AccountBack> accountMap=Maps.newHashMap();
-		 for(AccountBack bean:listAccount){
-			 accountMap.put(bean.getUserId()+":"+bean.getAccountId()+":"+bean.getCoinCode(), bean);
-		 }
-		 
-		 //计算收益
-		List<UserIncomeVerifyTemp> listTemp=userIncomeVerifyTempMapper.getAll();
-		 
-		 Map<String,UserIncomeVerifyTemp> listTempMap=Maps.newHashMap();
-		 for(UserIncomeVerifyTemp bean:listTemp){
-			 listTempMap.put(bean.getUserId()+":"+bean.getId()+":"+bean.getCoinCode(), bean);
-		 }
-		
-		
-		
-		 for(String key:accountMap.keySet()){
-			 
-			 AccountBack bean=accountMap.get(key);
-			 
-			 UserIncomeVerifyTemp temp= listTempMap.get(key);
-			 
-			 //更新账户收益
-			 
-			 bean.setTodayIncome(temp.getCoinIncome());
-			 bean.setTotalIncome(bean.getTotalIncome().add(temp.getCoinIncome()));
-			 
-		 
-		 }
-		 
-		 //封装收益审核记录表
-		 List<UserIncomeVerify> listUserIncomeVerify=Lists.newArrayList();
-		 
-		 for(UserIncomeVerifyTemp bean:listTemp){
-			 
-			 UserIncomeVerify userIncomeVerify=new UserIncomeVerify();
-			 
-			 userIncomeVerify.setUserId(bean.getUserId());
-			 userIncomeVerify.setAccountId(bean.getAccountId());
-			 userIncomeVerify.setCoins(bean.getCoins());
-			 userIncomeVerify.setCoinIncome(bean.getCoinIncome());
-			 
-			 userIncomeVerify.setCoinDayRate(bean.getCoinDayRate());
-			 userIncomeVerify.setCoinYearRate(bean.getCoinYearRate());
-			 userIncomeVerify.setCoinCode(bean.getCoinCode());
-			 userIncomeVerify.setCountDate(new Date());
-			 userIncomeVerify.setUsdtUnit(bean.getUsdtUnit());
+		Date beginDate=new Date();
+		try {
+			String dateStr=new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 			
-			 userIncomeVerify.setUsdtIncome(bean.getUsdtIncome());
+			//判断是否以及计算今日收益
+			boolean flag=sysTaskJobMapper.checkJobIsRun(JobTypeEnum.COUNT_INCOME.getCode(), dateStr);
+			
+			if(flag){
+				return JsonResultHelp.buildFail(RspCodeEnum.$2400);
+			}
+			
+			//检测是否有数据
+			int count=userIncomeVerifyTempMapper.getUserIncomeVerifyTempCount(new Date());
+			
+			if(count<=0){
+				userIncomeVerifyTempMapper.truncateUserIncomeVerifyTemp();
+				return JsonResultHelp.buildFail(RspCodeEnum.$2302);
+			}
+			
+			
+			Date date=new Date();
+			
+			 List<AccountBack> listAccount =accountBackMapper.queryAll(date);
+			//获取昨日充值数据
+			
+			 Map<String,AccountBack> accountMap=Maps.newHashMap();
+			 for(AccountBack bean:listAccount){
+				 accountMap.put(bean.getUserId()+":"+bean.getAccountId()+":"+bean.getCoinCode(), bean);
+			 }
 			 
-			 userIncomeVerify.setIsSystemOperate(YesOrNoEnum.NO.getCode());
-			 userIncomeVerify.setOperateId(userId);
-			 userIncomeVerify.setOrderNo(bean.getOrderNo());
-			 userIncomeVerify.setGmtCreate(new Date());
-			 listUserIncomeVerify.add(userIncomeVerify);
-		 }
-		 
-		 //封装收益表
-		 List<UserIncomeRecord> listUserIncomeRecord=Lists.newArrayList();
-		 
-		 for(UserIncomeVerify bean:listUserIncomeVerify){
+			 //计算收益
+			List<UserIncomeVerifyTemp> listTemp=userIncomeVerifyTempMapper.getAll();
 			 
-			 UserIncomeRecord userIncomeRecord=new UserIncomeRecord();
-			 userIncomeRecord.setUserId(bean.getUserId());
-			 userIncomeRecord.setAccountId(bean.getAccountId());
-			 userIncomeRecord.setCoins(bean.getCoins());
-			 userIncomeRecord.setCoinIncome(bean.getCoinIncome());
-			 userIncomeRecord.setCoinDayRate(bean.getCoinDayRate());
-			 userIncomeRecord.setCoinYearRate(bean.getCoinYearRate());
-			 userIncomeRecord.setCoinCode(bean.getCoinCode());
-			 userIncomeRecord.setUsdtUnit(bean.getUsdtUnit());
-			 userIncomeRecord.setUsdtIncome(bean.getUsdtIncome());
-			 userIncomeRecord.setBindNo(bean.getOrderNo());
-			 userIncomeRecord.setGmtCreate(new Date());
-			 listUserIncomeRecord.add(userIncomeRecord);			 
-		 }
-		 //备份资产账户表
-		 
-		 //删除今日收益表
-		 //删除今日审核记录表
-		 //删除审核缓存表
-		 
-		 userIncomeRecordMapper.delUserIncomeRecordByDate(date);
-		 userIncomeVerifyMapper.delUserIncomeVerifyByDate(date);
-		 userIncomeVerifyTempMapper.truncateUserIncomeVerifyTemp();
-		 
-		 //增加收益表
-		 int index=0;
-		 
-		 List<UserIncomeRecord> listUserIncomeRecordTemp=Lists.newArrayList();
-		 for(UserIncomeRecord bean:listUserIncomeRecord){
-			 index++;
-			 listUserIncomeRecordTemp.add(bean);
+			 Map<String,UserIncomeVerifyTemp> listTempMap=Maps.newHashMap();
+			 for(UserIncomeVerifyTemp bean:listTemp){
+				 listTempMap.put(bean.getUserId()+":"+bean.getAccountId()+":"+bean.getCoinCode(), bean);
+			 }
+			
+			
+			
+			 for(String key:accountMap.keySet()){
+				 
+				 AccountBack bean=accountMap.get(key);
+				 
+				 UserIncomeVerifyTemp temp= listTempMap.get(key);
+				 if(null==temp){
+					 
+					 bean.setTodayIncome(BigDecimal.ZERO);
+				 }else{
+					 bean.setTodayIncome(temp.getCoinIncome());
+					 bean.setTotalIncome(bean.getTotalIncome().add(temp.getCoinIncome()));
+				 }
+				 
+				 //更新账户收益
+				
+				 
 			 
-			 if(index%1000==0){
+			 }
+			 
+			 //封装收益审核记录表
+			 List<UserIncomeVerify> listUserIncomeVerify=Lists.newArrayList();
+			 
+			 for(UserIncomeVerifyTemp bean:listTemp){
+				 
+				 UserIncomeVerify userIncomeVerify=new UserIncomeVerify();
+				 
+				 userIncomeVerify.setUserId(bean.getUserId());
+				 userIncomeVerify.setAccountId(bean.getAccountId());
+				 userIncomeVerify.setCoins(bean.getCoins());
+				 userIncomeVerify.setCoinIncome(bean.getCoinIncome());
+				 
+				 userIncomeVerify.setCoinDayRate(bean.getCoinDayRate());
+				 userIncomeVerify.setCoinYearRate(bean.getCoinYearRate());
+				 userIncomeVerify.setCoinCode(bean.getCoinCode());
+				 userIncomeVerify.setCountDate(new Date());
+				 userIncomeVerify.setUsdtUnit(bean.getUsdtUnit());
+				
+				 userIncomeVerify.setUsdtIncome(bean.getUsdtIncome());
+				 
+				 userIncomeVerify.setIsSystemOperate(YesOrNoEnum.NO.getCode());
+				 userIncomeVerify.setOperateId(userId);
+				 userIncomeVerify.setOrderNo(bean.getOrderNo());
+				 userIncomeVerify.setGmtCreate(new Date());
+				 listUserIncomeVerify.add(userIncomeVerify);
+			 }
+			 
+			 //封装收益表
+			 List<UserIncomeRecord> listUserIncomeRecord=Lists.newArrayList();
+			 
+			 for(UserIncomeVerify bean:listUserIncomeVerify){
+				 
+				 UserIncomeRecord userIncomeRecord=new UserIncomeRecord();
+				 userIncomeRecord.setUserId(bean.getUserId());
+				 userIncomeRecord.setAccountId(bean.getAccountId());
+				 userIncomeRecord.setCoins(bean.getCoins());
+				 userIncomeRecord.setCoinIncome(bean.getCoinIncome());
+				 userIncomeRecord.setCoinDayRate(bean.getCoinDayRate());
+				 userIncomeRecord.setCoinYearRate(bean.getCoinYearRate());
+				 userIncomeRecord.setCoinCode(bean.getCoinCode());
+				 userIncomeRecord.setUsdtUnit(bean.getUsdtUnit());
+				 userIncomeRecord.setUsdtIncome(bean.getUsdtIncome());
+				 userIncomeRecord.setBindNo(bean.getOrderNo());
+				 userIncomeRecord.setGmtCreate(new Date());
+				 listUserIncomeRecord.add(userIncomeRecord);			 
+			 }
+			 //备份资产账户表
+			 
+			 //删除今日收益表
+			 //删除今日审核记录表
+			 //删除审核缓存表
+			 
+			 userIncomeRecordMapper.delUserIncomeRecordByDate(date);
+			 userIncomeVerifyMapper.delUserIncomeVerifyByDate(date);
+			 userIncomeVerifyTempMapper.truncateUserIncomeVerifyTemp();
+			 
+			 //增加收益表
+			 int index=0;
+			 
+			 List<UserIncomeRecord> listUserIncomeRecordTemp=Lists.newArrayList();
+			 for(UserIncomeRecord bean:listUserIncomeRecord){
+				 index++;
+				 listUserIncomeRecordTemp.add(bean);
+				 
+				 if(index%1000==0){
+					 userIncomeRecordMapper.batchInsert(listUserIncomeRecordTemp);
+					 listUserIncomeRecordTemp.clear();
+				 }
+				 
+			 }
+			 
+			 if(listUserIncomeRecordTemp.size()>0){
 				 userIncomeRecordMapper.batchInsert(listUserIncomeRecordTemp);
 				 listUserIncomeRecordTemp.clear();
 			 }
 			 
-		 }
-		 
-		 if(listUserIncomeRecordTemp.size()>0){
-			 userIncomeRecordMapper.batchInsert(listUserIncomeRecordTemp);
-			 listUserIncomeRecordTemp.clear();
-		 }
-		 
-		 
-		 //增加审核记录表
-		 List<UserIncomeVerify> listUserIncomeVerifyTemp=Lists.newArrayList();
-		 index=0;
-		 for(UserIncomeVerify bean:listUserIncomeVerify){
-			 index++;
-			 listUserIncomeVerifyTemp.add(bean);
 			 
-			 if(index%1000==0){
+			 //增加审核记录表
+			 List<UserIncomeVerify> listUserIncomeVerifyTemp=Lists.newArrayList();
+			 index=0;
+			 for(UserIncomeVerify bean:listUserIncomeVerify){
+				 index++;
+				 listUserIncomeVerifyTemp.add(bean);
+				 
+				 if(index%1000==0){
+					 userIncomeVerifyMapper.batchInsert(listUserIncomeVerifyTemp);
+					 listUserIncomeVerifyTemp.clear();
+				 }
+				 
+			 }
+			 
+			 if(listUserIncomeVerifyTemp.size()>0){
 				 userIncomeVerifyMapper.batchInsert(listUserIncomeVerifyTemp);
 				 listUserIncomeVerifyTemp.clear();
 			 }
 			 
-		 }
-		 
-		 if(listUserIncomeVerifyTemp.size()>0){
-			 userIncomeVerifyMapper.batchInsert(listUserIncomeVerifyTemp);
-			 listUserIncomeVerifyTemp.clear();
-		 }
-		 
-		 
-		 List<Account> listAllAccount= accountMapper.queryAll();
-		 
-		 Map<String,Account> listAllAccountMap=Maps.newHashMap();
-		 
-		 for(Account bean:listAllAccount){
-			 listAllAccountMap.put(bean.getUserId()+":"+bean.getId()+":"+bean.getCoinCode(), bean);
-		 }
-		 
-		 
-		 
-		 Map<String,AssetTotal> assetTotalDestMap=Maps.newHashMap();
-	     List<AssetTotal> listAssetTotal=assetTotalMapper.queryAll();
-	     Map<String,AssetTotal> assetTotalMap=Maps.newHashMap();
-			for(AssetTotal bean:listAssetTotal){
-				assetTotalMap.put(bean.getCoinCode(), bean);
-			}
-			
-		 
-		 //修改计息资产和计息收益
-		 List<Account> listAccountTemp=Lists.newArrayList();
-		 index =0;
-		 for(String key:listAllAccountMap.keySet()){
-			 index++;
 			 
-			 Account account=listAllAccountMap.get(key);
+			 List<Account> listAllAccount= accountMapper.queryAll();
 			 
-			 AccountBack actBack= accountMap.get(key);
+			 Map<String,Account> listAllAccountMap=Maps.newHashMap();
 			 
-			 if(null!=actBack){
-				 
-				 account.setTodayIncome(actBack.getTodayIncome());
-				 account.setTotalIncome(actBack.getTotalIncome());
-				 account.setCanUseCoins(actBack.getTodayIncome().add(actBack.getCanUseCoins()));
-				 account.setTodayCoins(account.getCanUseCoins());
-				 account.setCoins(account.getCoins().add(actBack.getTodayIncome()));
-				 
-			 }else{
-				 account.setTodayIncome(BigDecimal.ZERO);
+			 for(Account bean:listAllAccount){
+				 listAllAccountMap.put(bean.getUserId()+":"+bean.getId()+":"+bean.getCoinCode(), bean);
 			 }
 			 
-			 listAccountTemp.add(account);
-			
-			 if(index%1000==0){
+			 
+			 
+			 Map<String,AssetTotal> assetTotalDestMap=Maps.newHashMap();
+		     List<AssetTotal> listAssetTotal=assetTotalMapper.queryAll();
+		     Map<String,AssetTotal> assetTotalMap=Maps.newHashMap();
+				for(AssetTotal bean:listAssetTotal){
+					assetTotalMap.put(bean.getCoinCode(), bean);
+				}
+				
+			 
+			 //修改计息资产和计息收益
+			 List<Account> listAccountTemp=Lists.newArrayList();
+			 index =0;
+			 for(String key:listAllAccountMap.keySet()){
+				 index++;
+				 
+				 Account account=listAllAccountMap.get(key);
+				 
+				 AccountBack actBack= accountMap.get(key);
+				 
+				 if(null!=actBack){
+					 
+					 account.setTodayIncome(actBack.getTodayIncome());
+					 account.setTotalIncome(actBack.getTotalIncome());
+					 account.setCanUseCoins(actBack.getTodayIncome().add(actBack.getCanUseCoins()));
+					 account.setTodayCoins(account.getCanUseCoins());
+					 account.setCoins(account.getCoins().add(actBack.getTodayIncome()));
+					 
+				 }else{
+					 account.setTodayIncome(BigDecimal.ZERO);
+				 }
+				 
+				 listAccountTemp.add(account);
+				
+				 if(index%1000==0){
+					 accountMapper.batchUpdateAccountAssetIncome(listAccountTemp);
+					 listAccountTemp.clear();
+				 }
+				 
+				 AssetTotal assetTotal=assetTotalDestMap.get(account.getCoinCode());
+				 
+				 if(null==assetTotal){
+					 assetTotal=new AssetTotal();
+				 }
+				 
+				 assetTotal.setCoinCode(account.getCoinCode());
+				 assetTotal.setCoins(assetTotal.getCoins().add(account.getCoins()));
+				 assetTotal.setTodayIncome(assetTotal.getTodayIncome().add(account.getTodayIncome()));
+				 assetTotal.setTotalIncome(assetTotal.getTotalIncome().add(account.getTotalIncome()));
+				 assetTotal.setGmtCreate(new Date());
+				 assetTotal.setGmtModify(new Date());
+				 
+				 AssetTotal orgAssetTotal=assetTotalMap.get(account.getCoinCode());
+				 if(null!=orgAssetTotal){
+					 assetTotal.setYesterdayCoins(orgAssetTotal.getYesterdayCoins());
+				 }
+				 assetTotalDestMap.put(account.getCoinCode(), assetTotal);
+				 
+			 }
+			 if(listAccountTemp.size()>0){
 				 accountMapper.batchUpdateAccountAssetIncome(listAccountTemp);
 				 listAccountTemp.clear();
 			 }
 			 
-			 AssetTotal assetTotal=assetTotalDestMap.get(account.getCoinCode());
+			 //增加资产总收益
 			 
-			 if(null==assetTotal){
-				 assetTotal=new AssetTotal();
+			 assetTotalMapper.delAll();
+			 
+			 
+			 listAssetTotal=Lists.newArrayList();
+			 
+			 for(String key:assetTotalDestMap.keySet()){
+				 AssetTotal assetTotal= assetTotalDestMap.get(key);
+				 listAssetTotal.add(assetTotal);
+				 
 			 }
+			 assetTotalMapper.batchInsert(listAssetTotal);
+			 sysTaskJobMapper.insert(new SysTaskJob(beginDate,new Date(),JobTypeEnum.COUNT_INCOME.getCode(),YesOrNoEnum.YES.getCode(),""));
 			 
-			 assetTotal.setCoinCode(account.getCoinCode());
-			 assetTotal.setCoins(assetTotal.getCoins().add(account.getCoins()));
-			 assetTotal.setTodayIncome(assetTotal.getTodayIncome().add(account.getTodayIncome()));
-			 assetTotal.setTotalIncome(assetTotal.getTotalIncome().add(account.getTotalIncome()));
-			 assetTotal.setGmtCreate(new Date());
-			 assetTotal.setGmtModify(new Date());
-			 
-			 AssetTotal orgAssetTotal=assetTotalMap.get(account.getCoinCode());
-			 if(null!=orgAssetTotal){
-				 assetTotal.setYesterdayCoins(orgAssetTotal.getYesterdayCoins());
-			 }
-			 assetTotalDestMap.put(account.getCoinCode(), assetTotal);
-			 
-		 }
-		 if(listAccountTemp.size()>0){
-			 accountMapper.batchUpdateAccountAssetIncome(listAccountTemp);
-			 listAccountTemp.clear();
-		 }
-		 
-		 //增加资产总收益
-		 
-		 assetTotalMapper.delAll();
-		 
-		 
-		 listAssetTotal=Lists.newArrayList();
-		 
-		 for(String key:assetTotalDestMap.keySet()){
-			 AssetTotal assetTotal= assetTotalDestMap.get(key);
-			 listAssetTotal.add(assetTotal);
-			 
-		 }
-		 assetTotalMapper.batchInsert(listAssetTotal);
-		 
-		 
-		return JsonResultHelp.buildSucc();
-		
+			return JsonResultHelp.buildSucc();
+		} catch (Exception e) {
+			logger.error("{}",e);
+			sysTaskJobMapper.insert(new SysTaskJob(beginDate,new Date(),JobTypeEnum.COUNT_INCOME.getCode(),YesOrNoEnum.NO.getCode(), e.getMessage()));
+			return JsonResultHelp.buildFail();
+		}
 	}
 	
 	@Override
@@ -895,6 +908,7 @@ public class AssetServiceImpl implements AssetService {
 			record.setTradeType(TradeTypeEnum.OUT.getType());
 			record.setStatus(TradeStatusEnum.init.getStatus());
 			record.setIsSystemOperate(YesOrNoEnum.YES.getCode());
+			record.setTotalCoins(account.getCoins());
 			record.setOperateUserId(-1l);
 			record.setOrderNo(orderNo);
 			record.setGmtCreate(new Date());
@@ -963,10 +977,10 @@ public class AssetServiceImpl implements AssetService {
 				}
 				
 					
-					//判断是否以及计算今日收益
+					//判断是否以及计算可用资产
 					String dateStr=new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 					
-					boolean flag=sysTaskJobMapper.checkJobIsRun(JobTypeEnum.COUNT_INCOME.getCode(), dateStr);
+					boolean flag=sysTaskJobMapper.checkJobIsRun(JobTypeEnum.COUNT_USE_COINS.getCode(), dateStr);
 					
 					if(!flag){
 						
@@ -994,6 +1008,76 @@ public class AssetServiceImpl implements AssetService {
 			
 	}
 	
+	
+	/**
+	 * 计算可用资产
+	 * @return
+	 */
+	@Override
+	public JsonResult countCanUseAsset(){
+		Date beginDate=new Date();
+		String dateStr=new SimpleDateFormat("yyyy-MM-dd").format(beginDate);
+		
+		boolean flag=sysTaskJobMapper.checkJobIsRun(JobTypeEnum.COUNT_USE_COINS.getCode(), dateStr);
+		if(flag){
+			return JsonResultHelp.buildFail(RspCodeEnum.$2401);
+		}
+		
+		try {
+			//获取昨日充值数据
+			
+			 List<UserDayTotalCoinRecord> listUserDayTotalCoinRecord= userDayTotalCoinRecordMapper.queryUserDayTotalCoinRecord(DateUtils.addDays(new Date(), -1));
+			
+			//获取所有用户数据
+			 
+			 List<Account> listAccount=accountMapper.queryAll();
+			 
+			 Map<String,Account> accountMap=Maps.newHashMap();
+			 for(Account bean:listAccount){
+				 accountMap.put(bean.getUserId()+":"+bean.getId()+":"+bean.getCoinCode(), bean);
+			 }
+			 
+			 //更新用户计息资产=(昨日投资资产+历史计息资产)
+			 
+			 for(UserDayTotalCoinRecord bean:listUserDayTotalCoinRecord){
+				 String key=bean.getUserId()+":"+bean.getAccountId()+":"+bean.getCoinCode();
+				 Account account= accountMap.get(key);
+				 if(null!=account){
+					 //计算新的计息资产
+					 account.setCanUseCoins(bean.getCoins().subtract(bean.getCostAmount()).add(account.getCanUseCoins()));
+					 account.setTodayCoins(account.getCanUseCoins());
+					 accountMap.put(key, account);
+				 }
+			 }
+			 
+			//修改计息资产
+			 int index=0;
+			 List<Account> listAccountTemp=Lists.newArrayList();
+			 for(String key:accountMap.keySet()){
+				 index++;
+				 listAccountTemp.add(accountMap.get(key));
+				
+				 if(index%1000==0){
+					 accountMapper.batchUpdateAccountIncome(listAccountTemp);
+					 listAccountTemp.clear();
+				 }
+				 
+			 }
+			 if(listAccountTemp.size()>0){
+				 accountMapper.batchUpdateAccountIncome(listAccountTemp);
+				 listAccountTemp.clear();
+				 
+			 }
+			 
+			 sysTaskJobMapper.insert(new SysTaskJob(beginDate,new Date(),JobTypeEnum.COUNT_USE_COINS.getCode(),YesOrNoEnum.YES.getCode(), ""));
+		} catch (Exception e) {
+			 logger.error(""+e);
+			 sysTaskJobMapper.insert(new SysTaskJob(beginDate,new Date(),JobTypeEnum.COUNT_USE_COINS.getCode(),YesOrNoEnum.NO.getCode(), e.getMessage()));
+		}
+		
+		 return JsonResultHelp.buildSucc();
+		 
+	}
 	
 	
 	

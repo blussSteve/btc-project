@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.btc.global.json.JsonResult;
+import com.btc.global.json.JsonResultHelp;
 import com.btc.global.page.Page;
 import com.btc.global.page.PageUtil;
 import com.btc.model.CoinRecord;
@@ -50,12 +51,12 @@ public class AssetController extends BaseController{
 	 * @return
 	 */
 	@RequestMapping(value="/tradeRecord")
-	public Page<Map<String, String>> queryCoinRecord(HttpServletRequest req){
+	public JsonResult queryCoinRecord(HttpServletRequest req){
 		
 		CoinRecord record=new CoinRecord();
 		record.setUserId(getUserId(req));
 		Page<Map<String, String>> page=PageUtil.getPage(req);
-		return userService.queryCoinRecord(page, record);
+		return JsonResultHelp.buildSucc(userService.queryCoinRecord(page, record));
 	}
 
 	

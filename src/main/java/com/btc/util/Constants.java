@@ -37,6 +37,9 @@ public class Constants {
     /**lbank token 缓存时间*/
     public static final long LBANK_TOKEN_TIME_CACHE=7000;
     
+    /**计算收益**/
+    public static final String ASSET_INCOME_TASK_KEY="ASSET_INCOME_TASK_KEY";
     
-    public static final String ASSET_TASK_KEY="ASSET_TASK_KEY";
+    /**计算可用资产*/
+    public static final String ASSET_CAN_USE_COINSTASK_KEY="ASSET_CAN_USE_COINSTASK_KEY";
 }

@@ -2,6 +2,7 @@ package com.btc.mapper;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.ResultMap;
@@ -34,4 +35,8 @@ public interface AccountBackMapper {
     @Select("SELECT * FROM btc_account_back t WHERE DATE(t.count_date)=DATE(#{arg0})")
     @ResultMap("BaseResultMap")
     List<AccountBack> queryAll(Date date);
+    
+    List<AccountBack> queryAccountHis(Map<String,Object> params);
+    
+    int getAccountHisCount(Map<String,Object> params);
 }

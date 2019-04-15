@@ -74,11 +74,7 @@
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		</table>  --> 
 
-	<!-- 	<table tableName="btc_account_back" domainObjectName="AccountBack" enableCountByExample="false"
-		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
-		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
-		</table> 
+	<!-- 	
 	   <table tableName="btc_account" domainObjectName="Account" enableCountByExample="false"
 		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
@@ -113,11 +109,16 @@
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
 		</table> -->
-<table tableName="btc_user_day_total_coin_record" domainObjectName="UserDayTotalCoinRecord" enableCountByExample="false"
+<!-- <table tableName="btc_user_day_total_coin_record" domainObjectName="UserDayTotalCoinRecord" enableCountByExample="false"
 		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
-		</table>
+		</table> -->
+		<table tableName="btc_account" domainObjectName="Account" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> 
 
 		<!-- maven 启动指令 mybatis-generator:generate -->
 	</context>

@@ -63,6 +63,7 @@ public class LbankUtil {
 				return LbankResult.buildSucc(lbankToken);
 			}
 			LbankRspData lbankRspData=JSON.parseObject(str, LbankRspData.class);
+			
 			return LbankResult.buildFailMsg(LbankRspCodeEnum.FAIL,lbankRspData.getMessage());
 		} catch (Exception e) {
 			logger.error(""+e);

@@ -18,6 +18,7 @@
 		<script src="/admin/js/common.js"></script>
 		<script src="/admin/js/moment.js"></script>
 
+
 		<script src="/admin/dist/bootstrap-table/extensions/export/bootstrap-table-export.min.js"></script>
 
 		<script src="/admin/dist/bootstrap-table/extensions/tableexport.jquery.plugin/libs/FileSaver/FileSaver.min.js"></script>
@@ -83,22 +84,18 @@
 					<div class="panel-title">
 						<div class="row">
 							<div class="col-xs-5 col-md-4 text-left h5">
-								<i class="fa fa-tag">&nbsp;&nbsp;信息查询</i>
-							</div>
-							<div class="col-xs-7 col-md-8 text-right h5">
-								<i class="fa fa-search" id="data-search">&nbsp;&nbsp;<a href="javascript:void(0)">查询</a></i>
-								<a class="fa fa-angle-down" id="data-search-arrow" href="javascript:void(0)"></a>
+								<i class="fa fa-tag">&nbsp;&nbsp;
+									<a data-toggle="collapse" href="#collapseOne">
+									信息查询
+									</a>
+									</i>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div id="data-search-panel" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="data-search-panel">
+				<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="data-search-panel">
 					<div class="panel-body">
 						<form class="form-inline">
-							<div class="form-group">
-								<label for="search-userName">时间</label>
-								<input type="text" class="form-control" id="search-userName" placeholder="姓名">
-							</div>
 							<div class="form-group">
 								<label for="search-coinCode">币种</label>
 								<select class="form-control" id="search-coinCode" style="width: 120px;">
@@ -106,114 +103,42 @@
 								</select>
 							</div>
 							<div class="form-group">
+								<label for="search-userId">用户id</label>
+								<input type="text" class="form-control" id="search-userId" placeholder="id" style="width: 140px;">
+							</div>
+							<div class="form-group">
 								<label for="search-date">时间</label>
 								<input type="text" class="form-control" id="search-date" placeholder="起止时间">
 							</div>
+							<div class="form-group">
+								<label for="search-userName">姓名</label>
+								<input type="text" class="form-control" id="search-userName" placeholder="姓名">
+							</div>
 						</form>
-
 					</div>
 
 				</div>
 			</div>
-			<div class="body-table">
-				<div id="toolbar">
-					<form class="form-inline">
-						<div class="form-group">
-							<button type="button" id="createData" class="btn btn-warning ">生成数据</button>
-							<button type="button" id="commitData" class="btn btn-danger ">提交数据</button>
-						</div>
-						<div class="form-group">
-							<select class="form-control">
-								<option value="all">Export All</option>
-								<option value="basic">Export Basic</option>
-								<option value="selected">Export Selected</option>
-							</select>
-						</div>
 
-				</div>
+			<div class="body-table">
 
 			</div>
 			<table id="table"></table>
 		</div>
-		</div>
+
 	</body>
 	<script type="text/javascript">
 		$(function() {
 
 			var $table = $("#table"); //初始化bootstrap-table的内容
-			var coins = new Array();
-			$("#createData").click(function() {
 
-				var flag = window.confirm("生成数据时请勿作其他操作");
-
-				if(flag) {
-					$(this).text("加载中...").attr("disabled", true);
-					$.ajax({
-						type: 'post',
-						url: '/admin/userIncomeVerifyTemp/createUserIncomeMessage',
-						cache: false,
-						dataType: 'json',
-						async: true,
-						success: function(data) {
-							if("0000"==data.code){
-								alert("成功")
-								$table.bootstrapTable('refresh');
-							}else{
-								alert(data.msg)
-							}
-							
-							$("#createData").text("生成数据").attr("disabled", false);
-						},
-						error: function() {
-							alert("请求失败");
-							$("#createData").text("生成数据").attr("disabled", false);
-						}
-					})
-
-				}
-				//				
-			});
-
-			$("#commitData").click(function() {
-				var flag = window.confirm("请仔细核查数据后再提交");
-
-				if(flag) {
-					$(this).text("加载中...").attr("disabled", true);
-					$.ajax({
-						type: 'post',
-						url: '/admin/userIncomeVerifyTemp/commitUserIncomeMessage',
-						cache: false,
-						dataType: 'json',
-						async: true,
-						success: function(data) {
-							if("0000"==data.code){
-								alert("成功")
-								$table.bootstrapTable('refresh');
-							}else{
-								alert(data.msg)
-							}
-							
-							$("#commitData").text("提交数据").attr("disabled", false);
-						},
-						error: function() {
-							alert("请求失败");
-							$("#commitData").text("提交数据").attr("disabled", false);
-						}
-					})
-
-				}
-			});
-
-			initSearchDate();
+			InitMainTable()
 			initCoinDic();
 
 			function InitMainTable(exportDataType) {
-				if(!exportDataType) {
-					exportDataType = "all";
-				}
 				//记录页面bootstrap-table全局变量$table，方便应用
 				$table.bootstrapTable('destroy').bootstrapTable({
-					url: '/admin/userIncomeVerifyTemp/list?rnd=' + Math.random(), //请求后台的URL（*）
+					url: '/admin/user/accountHisList?rnd=' + Math.random(), //请求后台的URL（*）
 					method: 'post', //请求方式（*）
 					dataType: "json",
 					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -240,13 +165,13 @@
 					showToggle: false, //是否显示详细视图和列表视图的切换按钮
 					cardView: false, //是否显示详细视图
 					detailView: false, //是否显示父子表
-					singleSelect: false, //是否单选
+					singleSelect: true, //是否单选
 					showExport: true,
 					exportTypes: ['excel', 'xlsx'],
-					exportDataType: exportDataType, //basic', 'all', 'selected'
+					exportDataType: "all", //basic', 'all', 'selected'
 					exportOptions: {
 						ignoreColumn: [0, 0], //忽略某一列的索引  
-						fileName: '数据导出', //文件名称设置  
+						fileName: '用户数据', //文件名称设置  
 						worksheetName: 'Sheet1', //表格工作区名称  
 
 					},
@@ -254,88 +179,56 @@
 					//得到查询的参数
 					queryParams: function(params) {
 						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
-						var date = $("#search-date").val();
-
 						var temp = {
 							pageSize: params.limit, //页面大小
 							pageNo: (params.offset / params.limit) + 1, //页码
 							orderBy: params.sort, //排序列名  
 							order: params.order, //排位命令（desc，asc）
 							userName: $("#search-userName").val(),
-							coinCode: $("#search-coinCode").val(),
-							beginDate: date.split("/")[0],
-							endDate: date.split("/")[1]
+							userId: $("#search-userId").val(),
+							coinCode:$("#search-coinCode").val(),
+							countDate:$("#search-date").val()
+							
 						};
 						return temp;
 					},
 					columns: [{
-							checkbox: true,
-							visible: true //是否显示复选框  
-						}, {
-							field: 'userName',
-							title: '用户',
-						}, {
-							field: 'coinCode',
-							title: '货币'
-						}, {
-							field: 'coins',
-							title: '计息数量',
-							sortable: true,
-							sortName: 'coins',
-						}, {
-							field: 'coinIncome',
-							title: '利息收入',
-							sortable: true,
-							sortName: 'coin_income',
-							formatter: function(value, row, index) {
-								return '<span class="label label-success">' + value  + '</span>';
-							}
-						}, {
-							field: 'coinDayRate',
-							title: '日利率(%)',
-							sortable: true,
-							sortName: 'coin_day_rate',
-							formatter: function(value, row, index) {
-								return '<span class="label label-info">' + (value*100).toFixed(6)  + '</span>';
-							}
-						}, {
-							field: 'coinYearRate',
-							title: '年利率(%)',
-							sortable: true,
-							sortName: 'coin_year_rate',
-							formatter: function(value, row, index) {
-								return '<span class="label label-primary">' + (value*100).toFixed(6) + '</span>';
-							}
-						}, {
-							field: 'usdtUnit',
-							title: '单位(USDT)',
-							formatter: function(value, row, index) {
-								return '<span class="label label-success">' + value + '</span>';
-							}
-						}, {
-							field: 'usdtIncome',
-							title: '收益(USDT)',
-							sortable: true,
-							sortName: 'usdt_income',
-							formatter: function(value, row, index) {
-								return '<span class="label label-info">' + value + '</span>';
-							}
-						}, {
-							field: 'orderNo',
-							title: '流水号',
-						},
-						{
-							field: 'gmtCreate',
-							title: '日期',
-							sortable: true,
-							sortName: 'gmt_create',
-							formatter: function(value, row, index) {
-								return new moment(value).format("YYYY-MM-DD HH:mm:ss");
-							},
-
+						checkbox: true,
+						visible: false //是否显示复选框  
+					}, {
+						field: 'id',
+						title: '用户id',
+					}, {
+						field: 'userName',
+						title: '用户',
+					}, {
+						field: 'openId',
+						title: 'openId'
+					}, {
+						field: 'countDate',
+						title: '时间',
+						sortable: true,
+						sortName:'count_date',
+						formatter: function(value, row, index) {
+							return new moment(value).format("YYYY-MM-DD");
 						}
-					], //注册加载子表的事件
-					onExpandRow: function(index, row, $detail) {},
+					}, {
+						field: 'coinCode',
+						title: '货币',
+					}, {
+						field: 'coins',
+						title: '资产',
+					}, {
+						field: 'canUseCoins',
+						title: '计息资产',
+					}, {
+						field: 'todayIncome',
+						title: '今日收益',
+					}, {
+						field: 'totalIncome',
+						title: '累计收益',
+
+					}],
 					onLoadSuccess: function(data) {
 						console.log("加载成功");
 					},
@@ -347,68 +240,44 @@
 					}
 				});
 			};
-			//			InitMainTable(); //表单验证 
-			$('#toolbar').find('select').change(function() {
-				var exportDataType = $(this).val();
-				InitMainTable(exportDataType);
-			}).trigger('change');
 
-			function initCoinDic() {
-				//加载币种
+		})
 
-				$.ajax({
-					type: 'post',
-					url: '/admin/system/queryAllCoins',
-					cache: false,
-					dataType: 'json',
-					async: false,
-					success: function(data) {
-						if("0000" == data.code) {
-							$(data.data).each(function(index, el) {
-								$("#selectCoinCode").append("<option value='" + el.coinCode + "'>" + el.coinCode + "</option>")
-								$("#search-coinCode").append("<option value='" + el.coinCode + "'>" + el.coinCode + "</option>")
-								coins.push({
-									value: el.coinCode,
-									text: el.coinCode
-								});
-							})
-						} else {
-							alert(data.msg);
-						}
+		function initCoinDic() {
+			//加载币种
 
-					},
-					error: function() {
-						alert("请求失败")
+			$.ajax({
+				type: 'post',
+				url: '/admin/system/queryAllCoins',
+				cache: false,
+				dataType: 'json',
+				async: false,
+				success: function(data) {
+					if("0000" == data.code) {
+						$(data.data).each(function(index, el) {
+							$("#search-coinCode").append("<option value='" + el.coinCode + "'>" + el.coinCode + "</option>")
+						})
+					} else {
+						alert(data.msg);
 					}
-				})
 
-			}
+				},
+				error: function() {
+					alert("请求失败")
+				}
+			})
 
-			function initSearchDate() {
+		}
+		initSearchDate();
+		function initSearchDate() {
 
 				$('#search-date').daterangepicker({
-					"ranges": {
-						"今天": [
-							new moment().format("YYYY-MM-DD"),
-							new moment().format("YYYY-MM-DD")
-						],
-						"昨天": [
-							new moment().subtract(1, "d").format("YYYY-MM-DD"),
-							new moment().format("YYYY-MM-DD")
-						],
-						"最近7天": [
-							new moment().subtract(7, "d").format("YYYY-MM-DD"),
-							new moment().format("YYYY-MM-DD")
-						],
-						"最近一个月": [
-							new moment().subtract(30, "d").format("YYYY-MM-DD"),
-							new moment().format("YYYY-MM-DD")
-						]
-					},
+					"singleDatePicker": true,
+					"autoUpdateInput":false,
 					"locale": {
 						"direction": "ltr",
 						"format": "YYYY-MM-DD",
-						"separator": "/",
+						"separator": "-",
 						"applyLabel": "确定",
 						"cancelLabel": "清除",
 						"fromLabel": "From",
@@ -441,18 +310,19 @@
 					},
 					"showCustomRangeLabel": false,
 					"alwaysShowCalendars": true,
-					"startDate": new moment().subtract(30, "d").format("YYYY-MM-DD"),
+					"startDate": new moment().format("YYYY-MM-DD"),
 					"endDate": new moment().format("YYYY-MM-DD"),
 					"maxDate": new moment().format("YYYY-MM-DD"),
 
 				}, function(start, end, label) {});
 				$('#search-date').on('cancel.daterangepicker', function(ev, picker) {
 					$('#search-date').val('');
+				}).on('apply.daterangepicker',function(ev, picker){
+					$('#search-date').val(picker.startDate.format('YYYY-MM-DD'));
 				});
 
 			}
 
-		})
 	</script>
 
 </html>
