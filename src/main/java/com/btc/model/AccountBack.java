@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class AccountBack {
-    private Long id;
+   private Long id;
 
     private Long accountId;
 
@@ -21,6 +21,8 @@ public class AccountBack {
     private BigDecimal todayIncome;
 
     private BigDecimal totalIncome;
+
+    private BigDecimal todayRealIncome;
 
     private Integer status;
 
@@ -154,5 +156,14 @@ public class AccountBack {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
+
+	public BigDecimal getTodayRealIncome() {
+		return todayRealIncome;
+	}
+
+	public void setTodayRealIncome(BigDecimal todayRealIncome) {
+		this.todayRealIncome = todayRealIncome;
+	}
+	
     
 }

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="/admin/dist/bootstrap-3.3.7/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/admin/dist/daterangepicker/daterangepicker.css" />
+		<link rel="stylesheet" href="/admin/dist/bootstrap-table/bootstrap-table.min.css" />
+		<link rel="stylesheet" href="/admin/dist/font-awesome-4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/style.css" />
+		<script src="/admin/js/jquery-2.1.4.min.js"></script>
+		<script src="/admin/dist/daterangepicker/moment.min.js"></script>
+		<script src="/admin/dist/daterangepicker/daterangepicker.js"></script>
+		<script src="/admin/dist/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/bootstrap-table.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/locale/bootstrap-table-zh-CN.js"></script>
+		<script src="/admin/js/common.js"></script>
+		<script src="/admin/js/moment.js"></script>
+
+		<script src="/admin/dist/bootstrap-table/extensions/export/bootstrap-table-export.min.js"></script>
+
+		<script src="/admin/dist/bootstrap-table/extensions/tableexport.jquery.plugin/libs/FileSaver/FileSaver.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/extensions/tableexport.jquery.plugin/libs/js-xlsx/xlsx.core.min.js"></script>
+		<script src="/admin/dist/bootstrap-table/extensions/tableexport.jquery.plugin/tableExport.min.js"></script>
+
+	</head>
+	<style>
+		.panel-heading {
+			padding: 5px 10px;
+		}
+		
+		.panel-heading i {
+			padding-left: 5px;
+		}
+		
+		.form-inline .form-group {
+			padding: 10px 15px;
+		}
+		
+		.form-inline .form-group label {
+			padding-right: 15px;
+		}
+		
+		#table tr:nth-child(even) {
+			background: #f4f8fb;
+		}
+		
+		#toolbar {
+			padding-left: 10px;
+		}
+		
+		#toolbar .form-inline .form-group {
+			padding: 0;
+		}
+		
+		.upload {
+			text-align: center;
+			background-color: #50c3ff;
+			height: 35px;
+			line-height: 35px;
+			width: 100%;
+			border-radius: 6px;
+			font-size: 14px;
+			color: white;
+		}
+		
+		#showImg {
+			text-align: center;
+			padding-top: 10px;
+		}
+		
+		#showImg img {
+			max-width: 200px;
+		}
+	</style>
+
+	<body>
+		<div class="container-fluid">
+
+			<div class="panel panel-info panel-default">
+				<div class="panel-heading">
+					<div class="panel-title">
+						<div class="row">
+							<div class="col-xs-5 col-md-4 text-left h5">
+								<i class="fa fa-tag">&nbsp;&nbsp;信息查询</i>
+							</div>
+							<div class="col-xs-7 col-md-8 text-right h5">
+								<i class="fa fa-search" id="data-search">&nbsp;&nbsp;<a href="javascript:void(0)">查询</a></i>
+								<a class="fa fa-angle-down" id="data-search-arrow" href="javascript:void(0)"></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="data-search-panel" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="data-search-panel">
+					<div class="panel-body">
+						<form class="form-inline">
+							<div class="form-group">
+								<label for="search-userName">时间</label>
+								<input type="text" class="form-control" id="search-userName" placeholder="姓名">
+							</div>
+							<div class="form-group">
+								<label for="search-coinCode">币种</label>
+								<select class="form-control" id="search-coinCode" style="width: 120px;">
+									<option value="">--请选择--</option>
+								</select>
+							</div>
+						</form>
+
+					</div>
+
+				</div>
+			</div>
+			<div class="body-table">
+				<div id="toolbar">
+					<form class="form-inline">
+						<div class="form-group">
+								<label for="search-date">请选择日期</label>
+								<input type="text" class="form-control" id="create-date" placeholder="起止时间">
+							</div>
+						<div class="form-group">
+							<button type="button" id="createData" class="btn btn-warning ">生成数据</button>
+						</div>
+						<div class="form-group">
+							<select class="form-control">
+								<option value="all">Export All</option>
+								<option value="basic">Export Basic</option>
+								<option value="selected">Export Selected</option>
+							</select>
+						</div>
+
+				</div>
+
+			</div>
+			<table id="table"></table>
+		</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		$(function() {
+
+			var $table = $("#table"); //初始化bootstrap-table的内容
+			var coins = new Array();
+			$("#createData").click(function() {
+
+				var flag = window.confirm("生成数据时请勿作其他操作");
+
+				if(flag) {
+					$(this).text("加载中...").attr("disabled", true);
+					var date=$("#create-date").val();
+					$.ajax({
+						type: 'post',
+						url: '/admin/userIncomeVerifyTemp/createOldUserIncomeRecord',
+						cache: false,
+						dataType: 'json',
+						data:{dateStr:date},
+						async: true,
+						success: function(data) {
+							if("0000"==data.code){
+								alert("成功")
+								$table.bootstrapTable('refresh');
+							}else{
+								alert(data.msg)
+							}
+							
+							$("#createData").text("生成数据").attr("disabled", false);
+						},
+						error: function() {
+							alert("请求失败");
+							$("#createData").text("生成数据").attr("disabled", false);
+						}
+					})
+
+				}
+				//				
+			});
+
+
+			initSearchDate();
+			initCoinDic();
+
+			function InitMainTable(exportDataType) {
+				if(!exportDataType) {
+					exportDataType = "all";
+				}
+				//记录页面bootstrap-table全局变量$table，方便应用
+				$table.bootstrapTable('destroy').bootstrapTable({
+					url: '/admin/userIncomeVerifyTemp/list?rnd=' + Math.random(), //请求后台的URL（*）
+					method: 'post', //请求方式（*）
+					dataType: "json",
+					contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+					toolbar: '#toolbar', //工具按钮用哪个容
+					toolbarAlign: 'right',
+					striped: false, //是否显示行间隔色
+					cache: false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+					pagination: true, //是否显示分页（*）
+					sortable: true, //是否启用排序
+					sortOrder: "asc", //排序方式
+					sidePagination: "server", //分页方式：client客户端分页，server服务端分页（*）
+					pageNumber: 1, //初始化加载第一页，默认第一页,并记录
+					pageSize: 10, //每页的记录行数（*）
+					pageList: [10, 20, 50, 100], //可供选择的每页的行数（*）
+					search: false, //是否显示表格搜索
+					strictSearch: true,
+					showColumns: true, //是否显示所有的列（选择显示的列）
+					showRefresh: true, //是否显示刷新按钮
+					showFullscreen: false,
+					minimumCountColumns: 2, //最少允许的列数
+					clickToSelect: true, //是否启用点击选中行
+					//height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+					uniqueId: "id", //每一行的唯一标识，一般为主键列
+					showToggle: false, //是否显示详细视图和列表视图的切换按钮
+					cardView: false, //是否显示详细视图
+					detailView: false, //是否显示父子表
+					singleSelect: false, //是否单选
+					showExport: true,
+					exportTypes: ['excel', 'xlsx'],
+					exportDataType: exportDataType, //basic', 'all', 'selected'
+					exportOptions: {
+						ignoreColumn: [0, 0], //忽略某一列的索引  
+						fileName: '数据导出', //文件名称设置  
+						worksheetName: 'Sheet1', //表格工作区名称  
+
+					},
+
+					//得到查询的参数
+					queryParams: function(params) {
+						//这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+						var date = $("#search-date").val();
+
+						var temp = {
+							pageSize: params.limit, //页面大小
+							pageNo: (params.offset / params.limit) + 1, //页码
+							orderBy: params.sort, //排序列名  
+							order: params.order, //排位命令（desc，asc）
+							userName: $("#search-userName").val(),
+							coinCode: $("#search-coinCode").val(),
+						};
+						return temp;
+					},
+					columns: [{
+							checkbox: true,
+							visible: true //是否显示复选框  
+						}, {
+							field: 'userName',
+							title: '用户',
+						}, {
+							field: 'openId',
+							title: 'openid',
+						}, {
+							field: 'coinCode',
+							title: '货币'
+						}, {
+							field: 'coins',
+							title: '计息数量',
+							sortable: true,
+							sortName: 'coins',
+						}, {
+							field: 'coinIncome',
+							title: '利息收入',
+							sortable: true,
+							sortName: 'coin_income',
+							formatter: function(value, row, index) {
+								return '<span class="label label-success">' + value  + '</span>';
+							}
+						}, {
+							field: 'coinDayRate',
+							title: '日利率(%)',
+							sortable: true,
+							sortName: 'coin_day_rate',
+							formatter: function(value, row, index) {
+								return '<span class="label label-info">' + (value*100).toFixed(6)  + '</span>';
+							}
+						}, {
+							field: 'coinYearRate',
+							title: '年利率(%)',
+							sortable: true,
+							sortName: 'coin_year_rate',
+							formatter: function(value, row, index) {
+								return '<span class="label label-primary">' + (value*100).toFixed(6) + '</span>';
+							}
+						}, {
+							field: 'usdtUnit',
+							title: '单位(USDT)',
+							formatter: function(value, row, index) {
+								return '<span class="label label-success">' + value + '</span>';
+							}
+						}, {
+							field: 'usdtIncome',
+							title: '收益(USDT)',
+							sortable: true,
+							sortName: 'usdt_income',
+							formatter: function(value, row, index) {
+								return '<span class="label label-info">' + value + '</span>';
+							}
+						}, {
+							field: 'orderNo',
+							title: '流水号',
+						},
+						{
+							field: 'countDate',
+							title: '统计时间',
+							sortable: true,
+							sortName: 'count_date',
+							formatter: function(value, row, index) {
+								return new moment(value).format("YYYY-MM-DD");
+							},
+
+						},
+						{
+							field: 'gmtCreate',
+							title: '日期',
+							sortable: true,
+							sortName: 'gmt_create',
+							formatter: function(value, row, index) {
+								return new moment(value).format("YYYY-MM-DD HH:mm:ss");
+							},
+
+						}
+					], //注册加载子表的事件
+					onExpandRow: function(index, row, $detail) {},
+					onLoadSuccess: function(data) {
+						console.log("加载成功");
+					},
+					onLoadError: function() {
+						console.log("加载失败")
+					},
+					onDblClickRow: function(row, $element) {
+
+					}
+				});
+			};
+			//			InitMainTable(); //表单验证 
+			$('#toolbar').find('select').change(function() {
+				var exportDataType = $(this).val();
+				InitMainTable(exportDataType);
+			}).trigger('change');
+
+			function initCoinDic() {
+				//加载币种
+
+				$.ajax({
+					type: 'post',
+					url: '/admin/system/queryAllCoins',
+					cache: false,
+					dataType: 'json',
+					async: false,
+					success: function(data) {
+						if("0000" == data.code) {
+							$(data.data).each(function(index, el) {
+								$("#selectCoinCode").append("<option value='" + el.coinCode + "'>" + el.coinCode + "</option>")
+								$("#search-coinCode").append("<option value='" + el.coinCode + "'>" + el.coinCode + "</option>")
+								coins.push({
+									value: el.coinCode,
+									text: el.coinCode
+								});
+							})
+						} else {
+							alert(data.msg);
+						}
+
+					},
+					error: function() {
+						alert("请求失败")
+					}
+				})
+
+			}
+
+
+				initSearchDate();
+		function initSearchDate() {
+				$('#create-date').daterangepicker({
+					"singleDatePicker": true,
+					"autoUpdateInput":true,
+					"locale": {
+						"direction": "ltr",
+						"format": "YYYY-MM-DD",
+						"separator": "-",
+						"applyLabel": "确定",
+						"cancelLabel": "清除",
+						"fromLabel": "From",
+						"toLabel": "To",
+						"customRangeLabel": "Custom",
+						"daysOfWeek": [
+							"日",
+							"一",
+							"二",
+							"三",
+							"四",
+							"五",
+							"六",
+						],
+						"monthNames": [
+							"一月",
+							"二月",
+							"三月",
+							"四月",
+							"五月",
+							"六月",
+							"气月",
+							"八月",
+							"九月",
+							"十月",
+							"十一月",
+							"十二月"
+						],
+						"firstDay": 1
+					},
+					"showCustomRangeLabel": false,
+					"alwaysShowCalendars": true,
+					"startDate": new moment().format("YYYY-MM-DD"),
+					"maxDate": new moment().format("YYYY-MM-DD"),
+					"minDate": new moment().subtract(7, "d").format("YYYY-MM-DD"),
+				}, function(start, end, label) {});
+				$('#search-date').on('cancel.daterangepicker', function(ev, picker) {
+				}).on('apply.daterangepicker',function(ev, picker){
+				});
+
+			}
+
+		})
+	</script>
+
+</html>

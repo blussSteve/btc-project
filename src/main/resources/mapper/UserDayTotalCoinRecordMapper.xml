@@ -150,4 +150,32 @@
       gmt_modify = #{gmtModify,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  
+    <update id="batchUpdateUserDayTotalCoin" parameterType="java.util.List">
+     <foreach collection="list" item="item" index="index" separator=";">
+  	  UPDATE btc_user_day_total_coin_record t SET t.coins=t.coins+#{item.coins} WHERE t.account_id=#{item.accountId} AND DATE(t.count_date)=DATE(#{item.countDate})
+     </foreach>
+  </update>
+  
+  <insert id="batchInsert" parameterType="java.util.List">
+   	 insert into btc_user_day_total_coin_record (user_id, account_id, coin_code, 
+      coins, cost_amount, cost_amount_desc, 
+      count_date, gmt_create, gmt_modify
+      )
+    values 
+   <foreach collection="list" item="item" index="index" separator=",">
+   	(#{item.userId,jdbcType=BIGINT}, #{item.accountId,jdbcType=BIGINT}, #{item.coinCode,jdbcType=VARCHAR}, 
+      #{item.coins,jdbcType=DECIMAL}, #{item.costAmount,jdbcType=DECIMAL}, #{item.costAmountDesc,jdbcType=VARCHAR}, 
+      #{item.countDate,jdbcType=DATE}, #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModify,jdbcType=TIMESTAMP}
+      )
+     </foreach>
+     </insert>
+     
+     <select id="queryUserDayTotalCoinRecordByAccountIds" resultMap="BaseResultMap">
+      SELECT * FROM btc_user_day_total_coin_record t WHERE DATE(t.count_date)=DATE(#{arg0}) AND t.account_id IN
+        <foreach collection="arg1" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+     </select>
+     
 </mapper>

@@ -1,5 +1,7 @@
 package com.btc.service;
 
+import java.util.Date;
+
 import com.btc.global.json.JsonResult;
 import com.btc.global.page.Page;
 import com.btc.model.CoinRecord;
@@ -29,7 +31,10 @@ public interface AssetService {
 
 	JsonResult clearAccountAsset(long userId, long accountId);
 
-	JsonResult countCanUseAsset();
+	JsonResult countCanUseAsset(Date date);
+
+	JsonResult createUserIncomeVerifyHisTemp(int isSystemOperate,
+			long operateId, Date date);
 
 }
  

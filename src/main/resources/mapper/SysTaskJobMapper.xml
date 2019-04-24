@@ -6,15 +6,24 @@
     <result column="start_date" property="startDate" jdbcType="TIMESTAMP" />
     <result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
     <result column="job_type" property="jobType" jdbcType="INTEGER" />
+    <result column="count_date" property="countDate" jdbcType="DATE" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
     <result column="is_success" property="isSuccess" jdbcType="INTEGER" />
-    <result column="error_log" property="errorLog" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.btc.model.SysTaskJob" extends="BaseResultMap" >
+    <result column="error_log" property="errorLog" jdbcType="LONGVARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, start_date, end_date, job_type, is_success,error_log
+    id, start_date, end_date, job_type, count_date, gmt_create, is_success
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+  <sql id="Blob_Column_List" >
+    error_log
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
     from sys_task_job
     where id = #{id,jdbcType=BIGINT}
   </select>
@@ -24,11 +33,11 @@
   </delete>
   <insert id="insert" parameterType="com.btc.model.SysTaskJob" >
     insert into sys_task_job (id, start_date, end_date, 
-      job_type, is_success, error_log
-      )
+      job_type, count_date, gmt_create, 
+      is_success, error_log)
     values (#{id,jdbcType=BIGINT}, #{startDate,jdbcType=TIMESTAMP}, #{endDate,jdbcType=TIMESTAMP}, 
-      #{jobType,jdbcType=INTEGER}, #{isSuccess,jdbcType=INTEGER}, #{errorLog,jdbcType=LONGVARCHAR}
-      )
+      #{jobType,jdbcType=INTEGER}, #{countDate,jdbcType=DATE}, #{gmtCreate,jdbcType=TIMESTAMP}, 
+      #{isSuccess,jdbcType=INTEGER}, #{errorLog,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.btc.model.SysTaskJob" >
     insert into sys_task_job
@@ -44,6 +53,12 @@
       </if>
       <if test="jobType != null" >
         job_type,
+      </if>
+      <if test="countDate != null" >
+        count_date,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
       </if>
       <if test="isSuccess != null" >
         is_success,
@@ -65,6 +80,12 @@
       <if test="jobType != null" >
         #{jobType,jdbcType=INTEGER},
       </if>
+      <if test="countDate != null" >
+        #{countDate,jdbcType=DATE},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
       <if test="isSuccess != null" >
         #{isSuccess,jdbcType=INTEGER},
       </if>
@@ -85,6 +106,12 @@
       <if test="jobType != null" >
         job_type = #{jobType,jdbcType=INTEGER},
       </if>
+      <if test="countDate != null" >
+        count_date = #{countDate,jdbcType=DATE},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
       <if test="isSuccess != null" >
         is_success = #{isSuccess,jdbcType=INTEGER},
       </if>
@@ -99,6 +126,8 @@
     set start_date = #{startDate,jdbcType=TIMESTAMP},
       end_date = #{endDate,jdbcType=TIMESTAMP},
       job_type = #{jobType,jdbcType=INTEGER},
+      count_date = #{countDate,jdbcType=DATE},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
       is_success = #{isSuccess,jdbcType=INTEGER},
       error_log = #{errorLog,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
@@ -108,6 +137,8 @@
     set start_date = #{startDate,jdbcType=TIMESTAMP},
       end_date = #{endDate,jdbcType=TIMESTAMP},
       job_type = #{jobType,jdbcType=INTEGER},
+      count_date = #{countDate,jdbcType=DATE},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
       is_success = #{isSuccess,jdbcType=INTEGER}
     where id = #{id,jdbcType=BIGINT}
   </update>

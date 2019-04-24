@@ -62,10 +62,7 @@
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		</table>
 		-->
-		<!-- <table tableName="btc_user_income_record" domainObjectName="UserIncomeRecord" enableCountByExample="false"
-		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
-		</table> 
+		<!--  
 		
 		
 		
@@ -75,16 +72,9 @@
 		</table>  --> 
 
 	<!-- 	
-	   <table tableName="btc_account" domainObjectName="Account" enableCountByExample="false"
-		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
-		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
-		</table>   -->
+	     -->
 		<!-- 
-		<table tableName="sys_task_job" domainObjectName="sysTaskJob" enableCountByExample="false"
-		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
-		</table>
+	
 		<table tableName="btc_user_info" domainObjectName="userInfo" enableCountByExample="false"
 		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
@@ -114,12 +104,46 @@
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
 		</table> -->
-		<table tableName="btc_account" domainObjectName="Account" enableCountByExample="false"
+		<!-- <table tableName="btc_account" domainObjectName="Account" enableCountByExample="false"
 		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
 		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
 		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
 		</table> 
+ -->
 
+	<!-- <table tableName="btc_user_income_record" domainObjectName="UserIncomeRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> -->
+		
+		
+	<!-- 	<table tableName="btc_asset_add_record_temp" domainObjectName="AssetAddRecordTemp" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table>
+		
+		<table tableName="btc_asset_add_record" domainObjectName="AssetAddRecord" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> -->
+		
+			<table tableName="sys_task_job" domainObjectName="SysTaskJob" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		</table>
+		<!-- <table tableName="btc_account" domainObjectName="Account" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table> 
+		<table tableName="btc_account_back" domainObjectName="AccountBack" enableCountByExample="false"
+		enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+		selectByExampleQueryId="false" enableUpdateByPrimaryKey="true">
+		<generatedKey column="id" sqlStatement="MySql" identity="true"/>
+		</table>  -->
 		<!-- maven 启动指令 mybatis-generator:generate -->
 	</context>
 </generatorConfiguration>

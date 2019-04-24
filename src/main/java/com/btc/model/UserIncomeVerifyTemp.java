@@ -40,6 +40,8 @@ public class UserIncomeVerifyTemp {
 	private String beginDate;
 
 	private String endDate;
+	
+	private String openId;
 
 	public Long getId() {
 		return id;
@@ -183,6 +185,14 @@ public class UserIncomeVerifyTemp {
 
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
+	}
+
+	public String getOpenId() {
+		return openId;
+	}
+
+	public void setOpenId(String openId) {
+		this.openId = openId;
 	}
 	
 	

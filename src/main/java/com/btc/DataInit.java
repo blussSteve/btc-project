@@ -6,6 +6,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.btc.global.enums.SysConfigEnum;
+import com.btc.global.enums.UserEnum;
 import com.btc.service.RedisService;
 import com.btc.util.Constants;
 
@@ -18,7 +19,7 @@ public class DataInit implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 		setUserDicCache();
-		
+		initUser();
 	}
 	
 	/**
@@ -35,6 +36,15 @@ public class DataInit implements CommandLineRunner{
 		if(!redisService.hexists(Constants.SYS_DIC_CACHE, SysConfigEnum.IS_OPEN_ASSET_TURN_OUT.getKey())){
 			redisService.hset(Constants.SYS_DIC_CACHE, SysConfigEnum.IS_OPEN_ASSET_TURN_OUT.getKey(),SysConfigEnum.IS_OPEN_ASSET_TURN_OUT.getValue());
 		}
+		if(!redisService.hexists(Constants.SYS_DIC_CACHE, SysConfigEnum.IS_OPEN_ASSET_TRADE.getKey())){
+			redisService.hset(Constants.SYS_DIC_CACHE, SysConfigEnum.IS_OPEN_ASSET_TRADE.getKey(),SysConfigEnum.IS_OPEN_ASSET_TRADE.getValue());
+		}
+	}
+	
+	private void initUser(){
+		
+		redisService.hset(Constants.SYS_USER_CACHE+UserEnum.TASK_USER, "userName", UserEnum.TASK_USER.getUserName());
+		redisService.hset(Constants.SYS_USER_CACHE+UserEnum.TASK_USER, "userPwd", UserEnum.TASK_USER.getUserPwd());
 		
 	}
 	

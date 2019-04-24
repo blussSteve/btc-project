@@ -1,4 +1,5 @@
 package com.btc.service.impl.admin;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import com.btc.global.json.JsonResultHelp;
 import com.btc.global.json.enums.RspCodeEnum;
 import com.btc.global.page.Page;
 import com.btc.global.page.PageUtil;
+import com.btc.mapper.AccountMapper;
 import com.btc.mapper.AssetIncomeRecordMapper;
 import com.btc.mapper.AssetTotalMapper;
 import com.btc.mapper.CoinRateRecordMapper;
@@ -60,6 +62,9 @@ public class SystemServiceImpl implements SystemService {
 	
 	@Autowired
 	private AssetIncomeRecordMapper assetIncomeRecordMapper;
+	
+	@Autowired
+	private AccountMapper accountMapper;
 
 	@Override
 	public List<Map<String, Object>> listItem(HttpServletRequest request, HttpServletResponse response) {
@@ -160,7 +165,15 @@ public class SystemServiceImpl implements SystemService {
 	
 	@Override
 	public JsonResult delSysCoinsDic(long dicId){
-		sysCoinsDicMapper.deleteByPrimaryKey(dicId);
+		SysCoinsDic sysCoinsDic=sysCoinsDicMapper.selectByPrimaryKey(dicId);
+		
+		BigDecimal coins= accountMapper.getTotalCoins(sysCoinsDic.getCoinCode());
+		
+		if(coins.compareTo(BigDecimal.ZERO)==1){
+			return JsonResultHelp.buildFail(RspCodeEnum.$2308);
+		}
+		
+		sysCoinsDicMapper.setIsDel(dicId);
 		return JsonResultHelp.buildSucc();
 	}
 	@Override

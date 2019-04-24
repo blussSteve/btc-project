@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.btc.mapper.AssetAddRecordMapper" >
+  <resultMap id="BaseResultMap" type="com.btc.model.AssetAddRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="open_id" property="openId" jdbcType="VARCHAR" />
+    <result column="coin_code" property="coinCode" jdbcType="VARCHAR" />
+    <result column="coins" property="coins" jdbcType="DECIMAL" />
+    <result column="org_total_coins" property="orgTotalCoins" jdbcType="DECIMAL" />
+    <result column="bind_no" property="bindNo" jdbcType="VARCHAR" />
+    <result column="gmt_modify" property="gmtModify" jdbcType="TIMESTAMP" />
+    <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+     <result column="user_name" property="userName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="page_sort_condition">
+		limit #{pageNo},#{pageSize}
+	</sql>
+	<!-- 排序条件 -->
+	<sql id="order_by_condition">
+		<if test="orderBy != '' and  orderBy != null ">
+			ORDER BY t.${orderBy} ${order}
+		</if>
+	</sql>
+	<sql id="search_condition">
+		WHERE t.open_id=u.open_id
+		<if test="coinCode !=null and coinCode !=''">
+			AND t.coin_code= #{coinCode}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.user_name like '%${userName}%'
+		</if>
+		<if test="openId !=null and openId !=''">
+			AND u.open_id =#{openId}
+		</if>
+	</sql>
+	 <select id="queryAssetAddRecord" parameterType="java.util.HashMap"
+		resultMap="BaseResultMap">
+		SELECT t.*,u.user_name FROM btc_asset_add_record t,btc_user_info u 
+		<include refid="search_condition" />
+		<include refid="order_by_condition" />
+		<include refid="page_sort_condition" />
+	</select>
+	<select id="queryAssetAddRecordCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT count(1) FROM btc_asset_add_record t,btc_user_info u 
+		<include refid="search_condition" />
+	</select>
+  <sql id="Base_Column_List" >
+    id, open_id, coin_code, coins, org_total_coins, bind_no, gmt_modify, gmt_create
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from btc_asset_add_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from btc_asset_add_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.btc.model.AssetAddRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into btc_asset_add_record (open_id, coin_code, coins, 
+      org_total_coins, bind_no, gmt_modify, 
+      gmt_create)
+    values (#{openId,jdbcType=VARCHAR}, #{coinCode,jdbcType=VARCHAR}, #{coins,jdbcType=DECIMAL}, 
+      #{orgTotalCoins,jdbcType=DECIMAL}, #{bindNo,jdbcType=VARCHAR}, #{gmtModify,jdbcType=TIMESTAMP}, 
+      #{gmtCreate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.btc.model.AssetAddRecord" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into btc_asset_add_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="openId != null" >
+        open_id,
+      </if>
+      <if test="coinCode != null" >
+        coin_code,
+      </if>
+      <if test="coins != null" >
+        coins,
+      </if>
+      <if test="orgTotalCoins != null" >
+        org_total_coins,
+      </if>
+      <if test="bindNo != null" >
+        bind_no,
+      </if>
+      <if test="gmtModify != null" >
+        gmt_modify,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="openId != null" >
+        #{openId,jdbcType=VARCHAR},
+      </if>
+      <if test="coinCode != null" >
+        #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="coins != null" >
+        #{coins,jdbcType=DECIMAL},
+      </if>
+      <if test="orgTotalCoins != null" >
+        #{orgTotalCoins,jdbcType=DECIMAL},
+      </if>
+      <if test="bindNo != null" >
+        #{bindNo,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtModify != null" >
+        #{gmtModify,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.btc.model.AssetAddRecord" >
+    update btc_asset_add_record
+    <set >
+      <if test="openId != null" >
+        open_id = #{openId,jdbcType=VARCHAR},
+      </if>
+      <if test="coinCode != null" >
+        coin_code = #{coinCode,jdbcType=VARCHAR},
+      </if>
+      <if test="coins != null" >
+        coins = #{coins,jdbcType=DECIMAL},
+      </if>
+      <if test="orgTotalCoins != null" >
+        org_total_coins = #{orgTotalCoins,jdbcType=DECIMAL},
+      </if>
+      <if test="bindNo != null" >
+        bind_no = #{bindNo,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtModify != null" >
+        gmt_modify = #{gmtModify,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.btc.model.AssetAddRecord" >
+    update btc_asset_add_record
+    set open_id = #{openId,jdbcType=VARCHAR},
+      coin_code = #{coinCode,jdbcType=VARCHAR},
+      coins = #{coins,jdbcType=DECIMAL},
+      org_total_coins = #{orgTotalCoins,jdbcType=DECIMAL},
+      bind_no = #{bindNo,jdbcType=VARCHAR},
+      gmt_modify = #{gmtModify,jdbcType=TIMESTAMP},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+    <insert id="batchInsert" parameterType="java.util.List">
+     insert into btc_asset_add_record (open_id, coin_code, coins, 
+      org_total_coins, bind_no, gmt_modify, 
+      gmt_create)
+    values 
+   <foreach collection="list" item="item" index="index" separator=",">
+   (#{item.openId,jdbcType=VARCHAR}, #{item.coinCode,jdbcType=VARCHAR}, #{item.coins,jdbcType=DECIMAL}, 
+      #{item.orgTotalCoins,jdbcType=DECIMAL}, #{item.bindNo,jdbcType=VARCHAR}, #{item.gmtModify,jdbcType=TIMESTAMP}, 
+      #{item.gmtCreate,jdbcType=TIMESTAMP})
+     </foreach>
+     </insert>
+     
+      <select id="queryBindNos" parameterType="java.util.List" resultType="java.lang.String">
+     	  SELECT t.bind_no FROM btc_asset_add_record t WHERE t.bind_no IN
+	   <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+     </select>
+     
+</mapper>

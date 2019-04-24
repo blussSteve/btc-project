@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class Account {
-    private Long id;
+   private Long id;
 
     private Long userId;
 
@@ -18,6 +18,8 @@ public class Account {
 
     private BigDecimal todayIncome;
 
+    private BigDecimal todayRealIncome;
+
     private BigDecimal totalIncome;
 
     private Integer status;
@@ -30,93 +32,101 @@ public class Account {
     
     private String userName;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Long getUserId() {
-        return userId;
-    }
+	public Long getUserId() {
+		return userId;
+	}
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
-    public BigDecimal getCoins() {
-        return coins;
-    }
+	public BigDecimal getCoins() {
+		return coins;
+	}
 
-    public void setCoins(BigDecimal coins) {
-        this.coins = coins;
-    }
+	public void setCoins(BigDecimal coins) {
+		this.coins = coins;
+	}
 
-    public BigDecimal getCanUseCoins() {
-        return canUseCoins;
-    }
+	public BigDecimal getCanUseCoins() {
+		return canUseCoins;
+	}
 
-    public void setCanUseCoins(BigDecimal canUseCoins) {
-        this.canUseCoins = canUseCoins;
-    }
+	public void setCanUseCoins(BigDecimal canUseCoins) {
+		this.canUseCoins = canUseCoins;
+	}
 
-    public String getCoinCode() {
-        return coinCode;
-    }
+	public String getCoinCode() {
+		return coinCode;
+	}
 
-    public void setCoinCode(String coinCode) {
-        this.coinCode = coinCode;
-    }
+	public void setCoinCode(String coinCode) {
+		this.coinCode = coinCode;
+	}
 
-    public BigDecimal getTodayCoins() {
-        return todayCoins;
-    }
+	public BigDecimal getTodayCoins() {
+		return todayCoins;
+	}
 
-    public void setTodayCoins(BigDecimal todayCoins) {
-        this.todayCoins = todayCoins;
-    }
+	public void setTodayCoins(BigDecimal todayCoins) {
+		this.todayCoins = todayCoins;
+	}
 
-    public BigDecimal getTodayIncome() {
-        return todayIncome;
-    }
+	public BigDecimal getTodayIncome() {
+		return todayIncome;
+	}
 
-    public void setTodayIncome(BigDecimal todayIncome) {
-        this.todayIncome = todayIncome;
-    }
+	public void setTodayIncome(BigDecimal todayIncome) {
+		this.todayIncome = todayIncome;
+	}
 
-    public BigDecimal getTotalIncome() {
-        return totalIncome;
-    }
+	public BigDecimal getTodayRealIncome() {
+		return todayRealIncome;
+	}
 
-    public void setTotalIncome(BigDecimal totalIncome) {
-        this.totalIncome = totalIncome;
-    }
+	public void setTodayRealIncome(BigDecimal todayRealIncome) {
+		this.todayRealIncome = todayRealIncome;
+	}
 
-    public Integer getStatus() {
-        return status;
-    }
+	public BigDecimal getTotalIncome() {
+		return totalIncome;
+	}
 
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
+	public void setTotalIncome(BigDecimal totalIncome) {
+		this.totalIncome = totalIncome;
+	}
 
-    public Date getGmtCreate() {
-        return gmtCreate;
-    }
+	public Integer getStatus() {
+		return status;
+	}
 
-    public void setGmtCreate(Date gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
 
-    public Date getGmtModify() {
-        return gmtModify;
-    }
+	public Date getGmtCreate() {
+		return gmtCreate;
+	}
 
-    public void setGmtModify(Date gmtModify) {
-        this.gmtModify = gmtModify;
-    }
+	public void setGmtCreate(Date gmtCreate) {
+		this.gmtCreate = gmtCreate;
+	}
+
+	public Date getGmtModify() {
+		return gmtModify;
+	}
+
+	public void setGmtModify(Date gmtModify) {
+		this.gmtModify = gmtModify;
+	}
 
 	public String getOpenId() {
 		return openId;

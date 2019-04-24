@@ -59,6 +59,9 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.btc.model.UserInfo" >
+  <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
     insert into btc_user_info (id, open_id, token, 
       user_name, last_login_time, head_img, 
       gmt_create, gmt_modify)
@@ -67,6 +70,9 @@
       #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModify,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.btc.model.UserInfo" >
+  <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
     insert into btc_user_info
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -159,4 +165,17 @@
       gmt_modify = #{gmtModify,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  <select id="queryInOpenId" parameterType="java.util.List" resultType="java.lang.String">
+  SELECT t.open_id FROM btc_user_info t WHERE t.open_id in
+   <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+	  #{id}
+	</foreach>
+  </select>
+    <select id="queryUserInOpenId" parameterType="java.util.List" resultMap="BaseResultMap">
+	  SELECT t.* FROM btc_user_info t WHERE t.open_id in
+	   <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+  </select>
+  
 </mapper>

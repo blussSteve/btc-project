@@ -383,9 +383,12 @@
 					}, {
 						field: 'canUseCoins',
 						title: '计息资产',
-					}, {
+					} ,{
 						field: 'todayIncome',
-						title: '今日收益',
+						title: '今日已发利息', 
+					}, {
+						field: 'todayRealIncome',
+						title: '今日应发利息', 
 					}], //注册加载子表的事件
 					onLoadSuccess: function(data) {
 						console.log("加载成功");

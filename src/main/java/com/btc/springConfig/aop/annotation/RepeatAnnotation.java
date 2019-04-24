@@ -14,5 +14,9 @@ import java.lang.annotation.Target;
 @Documented
 public @interface RepeatAnnotation {
 	
+	/**
+	 * 是否禁止重复[true:是]
+	 * @return
+	 */
 	boolean isRepeat() default true;
 }

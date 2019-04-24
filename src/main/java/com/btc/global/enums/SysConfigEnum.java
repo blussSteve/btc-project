@@ -4,7 +4,8 @@ public enum SysConfigEnum {
 
 	COUNT_INCOME_BEGIN_DATE("COUNT_INCOME_BEGIN_DATE","16","计算收益开始时间"),
 	COUNT_INCOME_END_DATE("COUNT_INCOME_END_DATE","17","计算收益结束时间"),
-	IS_OPEN_ASSET_TURN_OUT("IS_OPEN_ASSET_TURN_OUT","1","是否开启资产转出");
+	IS_OPEN_ASSET_TURN_OUT("IS_OPEN_ASSET_TURN_OUT","1","是否开启资产转出"),
+	IS_OPEN_ASSET_TRADE("IS_OPEN_ASSET_TRADE","1","是否开启资产交易");
 	
 	private String key;
 	private String value;

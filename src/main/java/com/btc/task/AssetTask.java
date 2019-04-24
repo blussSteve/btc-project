@@ -1,5 +1,7 @@
 package com.btc.task;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,6 @@ public class AssetTask {
 	@Autowired
 	private AssetService assetService;
 	
-    
 	/**
 	 * 系统自动计算收益任务
 	 */
@@ -41,7 +42,7 @@ public class AssetTask {
 	public void countCanUseAsset(){
 		try {
 			if(RedissonManager.lock(Constants.ASSET_CAN_USE_COINSTASK_KEY)){
-				assetService.countCanUseAsset();
+				assetService.countCanUseAsset(new Date());
 			}
 		} catch (Exception e) {
 			logger.error("{}",e);

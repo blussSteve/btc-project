@@ -3,6 +3,8 @@ package com.btc.mapper;
 import java.util.Date;
 import java.util.List;
 
+import net.paoding.rose.web.annotation.Param;
+
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -34,4 +36,11 @@ public interface UserDayTotalCoinRecordMapper {
     
     @Update("UPDATE btc_user_day_total_coin_record t SET t.coins=t.coins+#{arg0} WHERE t.user_id=#{arg1} AND t.account_id=#{arg2} AND t.coin_code=#{arg3} AND DATE(t.count_date)=DATE(#{arg4})")
     int updateUserDayTotalCoinRecord(String amount, long userId,long accountId,String coinCode,Date date);
+    
+
+    List<UserDayTotalCoinRecord> queryUserDayTotalCoinRecordByAccountIds(Date date,List<String> list);
+    
+    int batchUpdateUserDayTotalCoin(@Param("list") List<UserDayTotalCoinRecord> list);
+    
+    int batchInsert(@Param("list") List<UserDayTotalCoinRecord> list);
 }

@@ -17,6 +17,7 @@ import com.btc.lbank.bean.LbankUserInfo;
 import com.btc.lbank.enums.LbankRspCodeEnum;
 import com.btc.util.HMACSHA256Util;
 import com.btc.util.HttpClientTool;
+import com.btc.util.StringUtil;
 import com.google.common.collect.Maps;
 
 @Component
@@ -54,12 +55,19 @@ public class LbankUtil {
 			params.put("client_id", lbankAppId);
 			params.put("access_code", accessCode);
 			
-			
+				
 			String str=HttpClientTool.doPost(lbankUrl+"/security/tocken", params,headers);
+			
+			JSONObject jb=JSON.parseObject(str);
+			if(!StringUtil.isEmpty(jb.getString("status"))){
+				LbankRspData lbankRspData=JSON.parseObject(str, LbankRspData.class);
+				return LbankResult.buildFailMsg(LbankRspCodeEnum.FAIL,lbankRspData.getMessage());
+				
+			}
 			
 			LbankToken lbankToken=JSON.parseObject(str, LbankToken.class);
 			
-			if(null!=lbankToken){
+			if(null!=lbankToken.getOpen_id()){
 				return LbankResult.buildSucc(lbankToken);
 			}
 			LbankRspData lbankRspData=JSON.parseObject(str, LbankRspData.class);

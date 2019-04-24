@@ -64,9 +64,19 @@ public interface AccountMapper {
     @Update("UPDATE btc_account t SET t.can_use_coins=t.can_use_coins-#{arg0} WHERE t.id=#{arg1}")
     int updateAccountCanUseAmount(BigDecimal amount,long accountId);
     
-    @Update("UPDATE btc_account t SET t.coins=0,t.today_income=0,t.can_use_coins=0,t.today_coins=0 WHERE t.id=#{arg0}")
+    @Update("UPDATE btc_account t SET t.coins=0,t.today_income=0,t.today_real_income=0,t.can_use_coins=0,t.today_coins=0 WHERE t.id=#{arg0}")
     int clearAccountAsset(long accountId);
     
     List<Map<String,String>> queryAllAsset();
+    
+
+    List<Account> queryAccountInOpenIds(List<String> list);
+    
+    int batchUpdateAccountAssetCoins(@Param("list") List<Account> list);
+    
+    int batchInsert(@Param("list") List<Account> list);
+    
+    @Select("SELECT SUM(t.coins) FROM btc_account t WHERE t.coin_code=#{arg0}")
+    BigDecimal getTotalCoins(String coinCode);
     
 }

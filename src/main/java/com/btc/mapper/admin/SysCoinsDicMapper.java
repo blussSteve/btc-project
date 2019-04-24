@@ -67,11 +67,11 @@ public interface SysCoinsDicMapper {
     
     void setIsDel(long dicId);
     
-    @Select("SELECT count(1)>0 FROM sys_coins_dic t WHERE t.coin_code=#{arg0}")
+    @Select("SELECT count(1)>0 FROM sys_coins_dic t WHERE t.coin_code=#{arg0} and t.is_del=0")
     public boolean checkCoinsCodeIsExist(String coinCode);
     
     
-    @Select("SELECT * FROM sys_coins_dic t WHERE t.coin_code=#{arg0}")
+    @Select("SELECT * FROM sys_coins_dic t WHERE t.coin_code=#{arg0} and t.is_del=0")
     @ResultMap("BaseResultMap")
     public SysCoinsDic getCoinsCodeDicByCode(String coinCode);
     

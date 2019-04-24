@@ -9,15 +9,15 @@
     <result column="coin_code" property="coinCode" jdbcType="VARCHAR" />
     <result column="today_coins" property="todayCoins" jdbcType="DECIMAL" />
     <result column="today_income" property="todayIncome" jdbcType="DECIMAL" />
+    <result column="today_real_income" property="todayRealIncome" jdbcType="DECIMAL" />
     <result column="total_income" property="totalIncome" jdbcType="DECIMAL" />
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
     <result column="gmt_modify" property="gmtModify" jdbcType="TIMESTAMP" />
-    <result column="open_id" property="openId" />
+      <result column="open_id" property="openId" />
     <result column="user_name" property="userName" />
-    
   </resultMap>
-   <sql id="page_sort_condition">
+  <sql id="page_sort_condition">
 		limit #{pageNo},#{pageSize}
 	</sql>
 	<!-- 排序条件 -->
@@ -53,8 +53,8 @@
 		<include refid="search_condition" />
 	</select>
   <sql id="Base_Column_List" >
-    id, user_id, coins, can_use_coins, coin_code, today_coins, today_income, total_income, 
-    status, gmt_create, gmt_modify
+    id, user_id, coins, can_use_coins, coin_code, today_coins, today_income, today_real_income, 
+    total_income, status, gmt_create, gmt_modify
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -72,12 +72,12 @@
     </selectKey>
     insert into btc_account (user_id, coins, can_use_coins, 
       coin_code, today_coins, today_income, 
-      total_income, status, gmt_create, 
-      gmt_modify)
+      today_real_income, total_income, status, 
+      gmt_create, gmt_modify)
     values (#{userId,jdbcType=BIGINT}, #{coins,jdbcType=DECIMAL}, #{canUseCoins,jdbcType=DECIMAL}, 
       #{coinCode,jdbcType=VARCHAR}, #{todayCoins,jdbcType=DECIMAL}, #{todayIncome,jdbcType=DECIMAL}, 
-      #{totalIncome,jdbcType=DECIMAL}, #{status,jdbcType=INTEGER}, #{gmtCreate,jdbcType=TIMESTAMP}, 
-      #{gmtModify,jdbcType=TIMESTAMP})
+      #{todayRealIncome,jdbcType=DECIMAL}, #{totalIncome,jdbcType=DECIMAL}, #{status,jdbcType=INTEGER}, 
+      #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModify,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.btc.model.Account" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -102,6 +102,9 @@
       </if>
       <if test="todayIncome != null" >
         today_income,
+      </if>
+      <if test="todayRealIncome != null" >
+        today_real_income,
       </if>
       <if test="totalIncome != null" >
         total_income,
@@ -134,6 +137,9 @@
       </if>
       <if test="todayIncome != null" >
         #{todayIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="todayRealIncome != null" >
+        #{todayRealIncome,jdbcType=DECIMAL},
       </if>
       <if test="totalIncome != null" >
         #{totalIncome,jdbcType=DECIMAL},
@@ -170,6 +176,9 @@
       <if test="todayIncome != null" >
         today_income = #{todayIncome,jdbcType=DECIMAL},
       </if>
+      <if test="todayRealIncome != null" >
+        today_real_income = #{todayRealIncome,jdbcType=DECIMAL},
+      </if>
       <if test="totalIncome != null" >
         total_income = #{totalIncome,jdbcType=DECIMAL},
       </if>
@@ -193,58 +202,90 @@
       coin_code = #{coinCode,jdbcType=VARCHAR},
       today_coins = #{todayCoins,jdbcType=DECIMAL},
       today_income = #{todayIncome,jdbcType=DECIMAL},
+      today_real_income = #{todayRealIncome,jdbcType=DECIMAL},
       total_income = #{totalIncome,jdbcType=DECIMAL},
       status = #{status,jdbcType=INTEGER},
       gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
       gmt_modify = #{gmtModify,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="batchUpdateAccountIncome" parameterType="java.util.List">
+    <update id="batchUpdateAccountIncome" parameterType="java.util.List">
      <foreach collection="list" item="item" index="index" separator=";">
-     UPDATE btc_account t SET t.can_use_coins=#{item.canUseCoins},t.today_income=#{item.todayIncome},t.total_income=#{item.totalIncome} WHERE t.id=#{item.id}
+     UPDATE btc_account t SET t.can_use_coins=#{item.canUseCoins},t.today_income=#{item.todayIncome},t.today_real_income=#{item.todayRealIncome},t.total_income=#{item.totalIncome} WHERE t.id=#{item.id}
      </foreach>
   </update>
    <update id="batchUpdateAccountAssetIncome" parameterType="java.util.List">
      <foreach collection="list" item="item" index="index" separator=";">
-     UPDATE btc_account t SET t.coins=t.coins+#{item.todayIncome},t.can_use_coins=#{item.canUseCoins},t.today_income=#{item.todayIncome},t.total_income=#{item.totalIncome} WHERE t.id=#{item.id}
+     UPDATE btc_account t SET t.coins=t.coins+#{item.todayIncome},t.can_use_coins=#{item.canUseCoins},t.today_income=#{item.todayIncome},t.today_real_income=#{item.todayRealIncome},t.total_income=#{item.totalIncome} WHERE t.id=#{item.id}
      </foreach>
   </update>
   <select id="queryAllAsset" resultType="java.util.HashMap">
-	 
-SELECT 
-  s.coin_code AS coinCode,
-  IF(
-    m.totalCoins IS NULL,
-    0,
-    m.totalCoins
-  ) AS totalCoins,
-  IF(
-    m.totalCountCoins IS NULL,
-    0,
-    m.totalCountCoins
-  ) AS totalCountCoins,
-  IF(
-    m.totalTodayIncome IS NULL,
-    0,
-    m.totalTodayIncome
-  ) AS totalTodayIncome,
-  IF(
-    m.totalIncome IS NULL,
-    0,
-    m.totalIncome
-  ) AS totalIncome 
-FROM
-  sys_coins_dic s 
-  LEFT JOIN 
-    (SELECT 
-      t.coin_code AS coinCode,
-      SUM(t.coins) AS totalCoins,
-      SUM(t.can_use_coins) AS totalCountCoins,
-      SUM(t.today_income) AS totalTodayIncome,
-      SUM(t.total_income) AS totalIncome 
-    FROM
-      btc_account t 
-    GROUP BY t.coin_code) m 
-    ON s.coin_code = m.coinCode 
+		SELECT 
+	  s.coin_code AS coinCode,
+	  IF(
+	    m.totalCoins IS NULL,
+	    0,
+	    m.totalCoins
+	  ) AS totalCoins,
+	  IF(
+	    m.totalCountCoins IS NULL,
+	    0,
+	    m.totalCountCoins
+	  ) AS totalCountCoins,
+	  IF(
+	    m.totalTodayIncome IS NULL,
+	    0,
+	    m.totalTodayIncome
+	  ) AS totalTodayIncome,
+	  IF(
+	    m.totalTodayRealIncome IS NULL,
+	    0,
+	    m.totalTodayRealIncome
+	  ) AS totalTodayRealIncome,
+	  IF(
+	    m.totalIncome IS NULL,
+	    0,
+	    m.totalIncome
+	  ) AS totalIncome 
+	FROM
+	  sys_coins_dic s 
+	  LEFT JOIN 
+	    (SELECT 
+	      t.coin_code AS coinCode,
+	      SUM(t.coins) AS totalCoins,
+	      SUM(t.can_use_coins) AS totalCountCoins,
+	      SUM(t.today_income) AS totalTodayIncome,
+	      SUM(t.total_income) AS totalIncome,
+	      SUM(t.today_real_income) AS totalTodayRealIncome
+	    FROM
+	      btc_account t 
+	    GROUP BY t.coin_code) m 
+	    ON s.coin_code = m.coinCode 
   </select>
+  
+   <update id="batchUpdateAccountAssetCoins" parameterType="java.util.List">
+     <foreach collection="list" item="item" index="index" separator=";">
+  	  UPDATE btc_account t SET t.coins=t.coins+#{item.coins} WHERE t.id=#{item.id}
+     </foreach>
+  </update>
+  
+  <insert id="batchInsert" parameterType="java.util.List">
+  insert into btc_account (user_id, coins, can_use_coins, 
+      coin_code, today_coins, today_income, 
+      today_real_income, total_income, status, 
+      gmt_create, gmt_modify)
+    values 
+   <foreach collection="list" item="item" index="index" separator=",">
+    (#{item.userId,jdbcType=BIGINT}, #{item.coins,jdbcType=DECIMAL}, #{item.canUseCoins,jdbcType=DECIMAL}, 
+      #{item.coinCode,jdbcType=VARCHAR}, #{item.todayCoins,jdbcType=DECIMAL}, #{item.todayIncome,jdbcType=DECIMAL}, 
+      #{item.todayRealIncome,jdbcType=DECIMAL}, #{item.totalIncome,jdbcType=DECIMAL}, #{item.status,jdbcType=INTEGER}, 
+      #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModify,jdbcType=TIMESTAMP})
+     </foreach>
+     </insert>
+     <select id="queryAccountInOpenIds" parameterType="java.util.List" resultMap="BaseResultMap">
+      SELECT a.*,t.open_id FROM btc_user_info t ,btc_account a WHERE t.id=a.user_id AND t.open_id IN
+	   <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+     </select>
 </mapper>

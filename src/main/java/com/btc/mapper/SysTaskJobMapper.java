@@ -19,6 +19,6 @@ public interface SysTaskJobMapper {
 
     int updateByPrimaryKey(SysTaskJob record);
     
-    @Select("SELECT count(1)>0 FROM sys_task_job t WHERE t.job_type=#{arg0} AND DATE(t.start_date)=DATE(#{arg1}) AND t.is_success=1")
+    @Select("SELECT count(1)>0 FROM sys_task_job t WHERE t.job_type=#{arg0} AND DATE(t.count_date)=DATE(#{arg1}) AND t.is_success=1")
     boolean checkJobIsRun(int type,String date);
 }

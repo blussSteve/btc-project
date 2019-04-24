@@ -42,4 +42,10 @@ public class Constants {
     
     /**计算可用资产*/
     public static final String ASSET_CAN_USE_COINSTASK_KEY="ASSET_CAN_USE_COINSTASK_KEY";
+    
+    /**计算可用资产*/
+    public static final String TASK_CACHE_KEY="TASK_CACHE_KEY";
+    
+    /**系统用户*/
+	public final static String SYS_USER_CACHE="sys_user_cache:";
 }

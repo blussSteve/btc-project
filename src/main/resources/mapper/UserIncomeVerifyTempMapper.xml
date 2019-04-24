@@ -17,7 +17,8 @@
     <result column="operate_id" property="operateId" jdbcType="BIGINT" />
     <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
     <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
-     <result column="user_name" property="userName"  />
+    <result column="user_name" property="userName"  />
+    <result column="open_id" property="openId"  />
   </resultMap>
   <sql id="Base_Column_List" >
     id, user_id, account_id, coins, coin_income, coin_day_rate, coin_year_rate, coin_code, 
@@ -242,7 +243,7 @@
 	</sql>
   
    <select id="queryUserIncomeVerifyTempRecord" parameterType="java.util.HashMap" resultMap="BaseResultMap">
-			SELECT t.*,u.user_name FROM btc_user_income_verify_temp t,btc_user_info u WHERE t.user_id=u.id
+			SELECT t.*,u.user_name,u.open_id FROM btc_user_income_verify_temp t,btc_user_info u WHERE t.user_id=u.id
 			<if test="userName !=null and userName !=''">
 				AND u.user_name like '%${userName}%'
 			</if>

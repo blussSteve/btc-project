@@ -56,7 +56,7 @@ public class WebRequestLogAspect {
     @Before("webRequestLog()")
     public void doBefore(JoinPoint joinPoint) {
         try {
-
+        	System.out.println("执行aop....................................");
             long beginTime = System.currentTimeMillis();
 
             // 接收到请求，记录请求内容

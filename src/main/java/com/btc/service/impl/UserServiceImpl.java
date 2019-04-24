@@ -181,7 +181,7 @@ public class UserServiceImpl implements UserService{
 		
 		if(!result.isFullSuccess()){
 			
-			return JsonResultHelp.buildFail(RspCodeEnum.$2600);
+			return JsonResultHelp.buildFail(RspCodeEnum.$2600,result.getMsg());
 		}
 		//如果成功
 		LbankToken lbankToken=result.getObj();
@@ -228,6 +228,18 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public JsonResult trade(String openId,long userId,String amount,String assetCode,int tradeType){
 		
+		
+		if(amount.contains(".")){
+			if(amount.split("\\.")[1].length()>8){
+				return JsonResultHelp.buildFail(RspCodeEnum.$2307);
+			}
+		}
+		boolean isSuccess=true;
+		//判断是否可以进行交易
+		
+		if(!DataCacheUtil.isCanTrade()){
+			return JsonResultHelp.buildFail(RspCodeEnum.$2604);
+		}
 		
 		//判断是否允许交易，资产计算期间禁止交易
 		if(!HolidayUtil.isCanTran()){
@@ -320,7 +332,7 @@ public class UserServiceImpl implements UserService{
 			//刷新token
 			LbankResult<LbankToken> refresh=lbankUtil.refreshToken(token.getRefresh_token());
 			if(!refresh.isFullSuccess()){
-				return JsonResultHelp.buildFail(RspCodeEnum.$2601,refresh.getMsg());
+				return JsonResultHelp.buildFail(RspCodeEnum.$0001,refresh.getMsg());
 			}
 			
 			token.setAccess_token(refresh.getObj().getAccess_token());
@@ -354,15 +366,18 @@ public class UserServiceImpl implements UserService{
 						record.setStatus(TradeStatusEnum.FAIL.getStatus());
 						record.setBindNo(lb.getObj().getBiz_number());
 						record.setGmtModify(new Date());
+						isSuccess=false;
 					}
 					
 				}else{
 					record.setStatus(TradeStatusEnum.FAIL.getStatus());
 					record.setGmtModify(new Date());
+					isSuccess=false;
 				}
 			}else{
 				record.setStatus(TradeStatusEnum.FAIL.getStatus());
 				record.setGmtModify(new Date());
+				isSuccess=false;
 			}
 			
 		
@@ -416,20 +431,25 @@ public class UserServiceImpl implements UserService{
 				BigDecimal costAmount=BigDecimal.ZERO;
 				
 				//直接扣除资产
-				accountMapper.updateAccountSub(totalCostAmount.toString(), account.getId());
+				accountMapper.updateAccountSub(amount, account.getId());
 				
 				UserDayTotalCoinRecord today=userDayTotalCoinRecordMapper.getUserDayTotalCoinRecord(userId, account.getId(), assetCode, new Date());
 				if(null!=today){
 					superlusAmount=superlusAmount.subtract(today.getCoins().subtract(today.getCostAmount()));
 					//如果够扣
-					if(superlusAmount.compareTo(BigDecimal.ZERO)==-1){
+					if(superlusAmount.doubleValue()<0){
 						costAmount=totalCostAmount;
+						
+						today.setCostAmount(today.getCostAmount().add(costAmount));
+						
 					}else{
-						costAmount=totalCostAmount;
+						costAmount=today.getCostAmount();
 						totalCostAmount=superlusAmount;
+						//如果不够扣则扣除当前所有金额
+						today.setCostAmount(today.getCostAmount());
 						
 					}
-					today.setCostAmount(today.getCostAmount().add(costAmount));
+					
 					
 					Map<String, String> jstlMap=Maps.newHashMap();
 					
@@ -461,11 +481,15 @@ public class UserServiceImpl implements UserService{
 							superlusAmount=superlusAmount.subtract(yesterday.getCoins().subtract(yesterday.getCostAmount()));
 							
 							//如果够扣
-							if(superlusAmount.compareTo(BigDecimal.ZERO)==-1){
+							if(superlusAmount.doubleValue()<0){
 								costAmount=totalCostAmount;
+								
+								today.setCostAmount(today.getCostAmount().add(costAmount));
 							}else{
-								costAmount=totalCostAmount;
+								costAmount=today.getCostAmount();
 								totalCostAmount=superlusAmount;
+								//如果不够扣则扣除当前所有金额
+								today.setCostAmount(today.getCostAmount());
 								
 							}
 							yesterday.setCostAmount(yesterday.getCostAmount().add(costAmount));
@@ -490,8 +514,8 @@ public class UserServiceImpl implements UserService{
 				
 				if(superlusAmount.compareTo(BigDecimal.ZERO)==1){
 					superlusAmount=account.getCanUseCoins().subtract(superlusAmount);
-					//如果扣除后剩余金额大于0
-					if(superlusAmount.compareTo(BigDecimal.ZERO)==-1){
+					//如果扣除后剩余金额小于0
+					if(superlusAmount.doubleValue()<0){
 						logger.error("用户资产划出错误,划出资产超过用户可提资产openId:{},userId:{},amount:{},assetCode:{},tradeType:{}",openId,userId,amount,assetCode,tradeType);
 						//总资产记为0
 						//计息资产计为0
@@ -511,6 +535,11 @@ public class UserServiceImpl implements UserService{
 		//解锁账户
 		accountMapper.updateAccountStatus(account.getId(), YesOrNoEnum.YES.getCode());
 		
+		
+		if(!isSuccess){
+			JsonResultHelp.buildSucc(RspCodeEnum.$2606);
+		}
+		
 		return JsonResultHelp.buildSucc();
 		
 	}
@@ -522,7 +551,7 @@ public class UserServiceImpl implements UserService{
 	 * @return
 	 */
 	@Override
-    @Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_S30,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
+    @Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_S10,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
 	public JsonResult getAssetInfo(long userId){
 		
 		Map<String,Object> map=Maps.newHashMap();
@@ -547,7 +576,7 @@ public class UserServiceImpl implements UserService{
 			//刷新token
 			LbankResult<LbankToken> refresh=lbankUtil.refreshToken(ltoken.getRefresh_token());
 			if(!refresh.isFullSuccess()){
-				return JsonResultHelp.buildFail(RspCodeEnum.$2601,refresh.getMsg());
+				return JsonResultHelp.buildFail(RspCodeEnum.$0001,refresh.getMsg());
 			}
 			
 			ltoken.setAccess_token(refresh.getObj().getAccess_token());
@@ -557,17 +586,25 @@ public class UserServiceImpl implements UserService{
 
 		}
 		
-		//批量获取账户余额
-		LbankResult<JSONObject> lr=lbankUtil.batchQueryBalance(user.getOpenId(), ltoken.getAccess_token(), assetCodes.toString());
+		JSONObject jb=null;
+		if(assetCodes.toString().length()>0){
+			//批量获取账户余额
+			LbankResult<JSONObject> lr=lbankUtil.batchQueryBalance(user.getOpenId(), ltoken.getAccess_token(), assetCodes.toString());
+			jb=lr.getObj();
+		}
+	
 		
-		JSONObject jb=lr.getObj();
+		
 		for(Account account:listAccount){
 			String curAmount="";
 			if(null!=jb){
 				curAmount=jb.getString(account.getCoinCode().toLowerCase());
 			}
-			
-			BigDecimal usdtUnit=USDTUtil.getUSDT(account.getCoinCode());
+			BigDecimal usdtUnit=BigDecimal.ONE;
+			if(!account.getCoinCode().toLowerCase().equals("usdt")){
+				usdtUnit=USDTUtil.getUSDT(account.getCoinCode());
+			}
+					
 			yesterdayIncome=yesterdayIncome.add(account.getTodayIncome().multiply(usdtUnit));
 			totalIncome=totalIncome.add(account.getTotalIncome().multiply(usdtUnit));
 			totalAsset=totalAsset.add(account.getCoins().multiply(usdtUnit));
@@ -579,7 +616,7 @@ public class UserServiceImpl implements UserService{
 			
 		}
 		if(totalAsset.compareTo(BigDecimal.ZERO)==1){
-			yearRate=yesterdayIncome.divide(totalAsset,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(365));
+			yearRate=yesterdayIncome.divide(totalAsset,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(365)).multiply(new BigDecimal(100)).setScale(4, BigDecimal.ROUND_DOWN);
 		}
 		
 	
@@ -589,7 +626,7 @@ public class UserServiceImpl implements UserService{
 		
 		map.put("yesterdayIncome", yesterdayIncome.setScale(4, BigDecimal.ROUND_DOWN));
 		map.put("totalIncome", totalIncome.setScale(4, BigDecimal.ROUND_DOWN));
-		map.put("yearRate", yearRate.multiply(new BigDecimal(365)).setScale(4, BigDecimal.ROUND_DOWN));
+		map.put("yearRate", yearRate);
 		map.put("totalAsset",totalAsset.setScale(4, BigDecimal.ROUND_DOWN));
 		map.put("allAsset",allAsset.setScale(4, BigDecimal.ROUND_DOWN));
 		if(allAsset.compareTo(BigDecimal.ZERO)==0){
@@ -652,11 +689,6 @@ public class UserServiceImpl implements UserService{
 			accountMap.put(act.getCoinCode(), act);
 		}
 		
-		UserInfo user=userInfoMapper.selectByPrimaryKey(userId);
-		
-		LbankToken ltoken=DataCacheUtil.getLbankToken(user.getOpenId());
-		
-	
 		
 		for(SysCoinsDic dic:listCoinDic){
 			
@@ -669,27 +701,9 @@ public class UserServiceImpl implements UserService{
 			map.put("totalIncome", "0");
 			map.put("kline", "");
 			
-			if(!lbankUtil.checkTokenIsValid(ltoken.getAccess_token(), ltoken.getOpen_id()).isSuccess()){
-				//刷新token
-				LbankResult<LbankToken> refresh=lbankUtil.refreshToken(ltoken.getRefresh_token());
-				if(!refresh.isFullSuccess()){
-					return JsonResultHelp.buildFail(RspCodeEnum.$2601,refresh.getMsg());
-				}
-				
-				ltoken.setAccess_token(refresh.getObj().getAccess_token());
-				ltoken.setRefresh_token(refresh.getObj().getRefresh_token());
-				
-				redisService.set(Constants.LBANK_TOKEN_CACHE+ltoken.getOpen_id(), JSON.toJSONString(ltoken),Constants.LBANK_TOKEN_TIME_CACHE);
-
-			}
-			
-			LbankResult<String> lresult=lbankUtil.queryBalance(user.getOpenId(), ltoken.getAccess_token(),dic.getCoinCode());
-			if(lresult.isFullSuccess()){
-				map.put("totalCoin",lresult.getObj());
-			}
 			if(null!=act){
-			
-				map.put("countCoin",  act.getCoins().doubleValue());
+				map.put("totalCoin",act.getCoins());
+				map.put("countCoin",  act.getCanUseCoins().doubleValue());
 				map.put("todayIncome", act.getTodayIncome().doubleValue());
 				map.put("totalIncome", act.getTotalIncome().doubleValue());
 				
@@ -719,9 +733,8 @@ private List<Map<String,String>> formateCoinKlin(List<UserIncomeRecord>  list,in
 		Map<String,String> kmap=Maps.newTreeMap();
 		for(UserIncomeRecord bean:list){
 			
-			String  date1=new SimpleDateFormat("yyyy-MM-dd").format(bean.getGmtCreate());
-			kmap.put("date", date1+"");
-			kmap.put("data", bean.getCoinIncome().doubleValue()+"");
+			String  date1=new SimpleDateFormat("yyyy-MM-dd").format(bean.getCountDate());
+			kmap.put(date1, bean.getCoinIncome().doubleValue()+"");
 			
 		}
 		
@@ -766,8 +779,8 @@ private List<Map<String,String>> formateCoinKlin(List<UserIncomeRecord>  list,in
 		 		String date=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bean.getGmtCreate());
 		 		map.put("date", date);
 		 		map.put("coinCode", bean.getCoinCode());
-		 		map.put("tradeAmount", bean.getCoins().doubleValue()+"");
-		 		map.put("curAsset", bean.getTotalCoins().doubleValue()+"");
+		 		map.put("tradeAmount", bean.getCoins().toPlainString());
+		 		map.put("curAsset", bean.getTotalCoins().toPlainString());
 		 		map.put("tradeType", bean.getTradeType()+"");
 		 		listMap.add(map);
 		 	}
@@ -777,6 +790,8 @@ private List<Map<String,String>> formateCoinKlin(List<UserIncomeRecord>  list,in
 		 	page.setTotal(count);
 		 	return page;
 	}
+	
+	
 	
 	
 }

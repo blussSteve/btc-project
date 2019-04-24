@@ -68,16 +68,16 @@ public interface UserIncomeRecordMapper {
     
     int getCoinRecordIncomeCount(Map<String,Object> params);
     
-    @Delete("DELETE t FROM btc_user_income_record t WHERE DATE(t.gmt_create)=DATE(#{arg0})")
+    @Delete("DELETE t FROM btc_user_income_record t WHERE DATE(t.count_date)=DATE(#{arg0})")
     void delUserIncomeRecordByDate(Date date);
     
-    @Select("SELECT * FROM btc_user_income_record t WHERE t.user_id=#{arg0} AND t.coin_code=#{arg1} AND DATE(t.gmt_create)>DATE_ADD(NOW(),INTERVAL #{arg2} DAY) ORDER BY t.gmt_create ASC")
+    @Select("SELECT * FROM btc_user_income_record t WHERE t.user_id=#{arg0} AND t.coin_code=#{arg1} AND DATE(t.count_date)>DATE_ADD(NOW(),INTERVAL #{arg2} DAY) ORDER BY t.count_date ASC")
     @ResultMap("BaseResultMap")
-    @Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_M30,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
+    @Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_S60,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
     List<UserIncomeRecord> queryUserCoinIncomeLine(long userId,String coinCode,int day);
     
-    @Select("SELECT SUM(t.usdt_income)AS data,DATE_FORMAT(t.gmt_create,'%Y-%m-%d') AS date FROM btc_user_income_record t WHERE t.user_id=#{arg0} AND DATE(t.gmt_create)>DATE_ADD(NOW(),INTERVAL #{arg1} DAY) GROUP BY DATE(t.gmt_create)  ORDER BY t.gmt_create ASC")
-    @Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_M30,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
+    @Select("SELECT SUM(t.usdt_income)AS data,DATE_FORMAT(t.count_date,'%Y-%m-%d') AS date FROM btc_user_income_record t WHERE t.user_id=#{arg0} AND DATE(t.count_date)>DATE_ADD(NOW(),INTERVAL #{arg1} DAY) GROUP BY DATE(t.count_date)  ORDER BY t.count_date ASC")
+    @Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_S60,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
     List<Map<String,String>> queryUserCoinUsdtIncomeLine(long userId,int day);
     
 }

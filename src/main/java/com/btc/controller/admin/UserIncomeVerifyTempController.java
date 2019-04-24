@@ -1,5 +1,9 @@
 package com.btc.controller.admin;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +56,17 @@ public class UserIncomeVerifyTempController extends AdminBaseController {
 	public JsonResult commitUserIncomeMessage(HttpServletRequest req){
 		return assetService.commitUserIncomeVerifyTemp(getUserId(req));
 		
+	}
+	
+	@RequestMapping("/indexOld")
+	public String toCoinRecordOld(){
+		return "userIncomeVerifyOldTemp";
+	}
+	@RequestMapping("/createOldUserIncomeRecord")
+	@ResponseBody
+	public JsonResult createUserIncomeVerifyTemp(HttpServletRequest req,String dateStr) throws ParseException{
+		
+		Date date=new SimpleDateFormat("yyyy-MM-dd").parse(dateStr);
+		return assetService.createUserIncomeVerifyHisTemp(YesOrNoEnum.NO.getCode(), 1, date);
 	}
 }

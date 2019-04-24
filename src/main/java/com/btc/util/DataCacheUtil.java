@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.btc.global.enums.SysConfigEnum;
+import com.btc.global.enums.UserEnum;
 import com.btc.lbank.bean.LbankToken;
 import com.btc.model.UserInfo;
 import com.btc.service.RedisService;
@@ -54,5 +56,27 @@ public class DataCacheUtil {
 	}
 	
 	
+	/**
+	 * 是否能进行交易
+	 * @return
+	 */
+	public static boolean isCanTrade(){
+		
+		String value=instance.redisService.hget(Constants.SYS_DIC_CACHE, SysConfigEnum.IS_OPEN_ASSET_TRADE.getKey());
+		
+	    if(value.equals("1")){
+	    	return true;
+	    }
+	    return false;
+		
+	}
+	public static boolean checkTaskUserIsTrue(String userName,String password){
+		String name=instance.redisService.hget(Constants.SYS_USER_CACHE+UserEnum.TASK_USER, "userName");
+		String pwd=instance.redisService.hget(Constants.SYS_USER_CACHE+UserEnum.TASK_USER, "userPwd");
+		if(userName.equals(name)&&password.equals(pwd)){
+			return true;
+		}
+		return false;
+	}
 	
 }

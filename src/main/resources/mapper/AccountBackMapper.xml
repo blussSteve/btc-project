@@ -11,6 +11,7 @@
     <result column="today_coins" property="todayCoins" jdbcType="DECIMAL" />
     <result column="today_income" property="todayIncome" jdbcType="DECIMAL" />
     <result column="total_income" property="totalIncome" jdbcType="DECIMAL" />
+    <result column="today_real_income" property="todayRealIncome" jdbcType="DECIMAL" />
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="count_date" property="countDate" jdbcType="DATE" />
     <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
@@ -18,7 +19,8 @@
       <result column="open_id" property="openId" />
     <result column="user_name" property="userName" />
   </resultMap>
-  <sql id="page_sort_condition">
+  
+   <sql id="page_sort_condition">
 		limit #{pageNo},#{pageSize}
 	</sql>
 	<!-- 排序条件 -->
@@ -61,7 +63,7 @@
 	
   <sql id="Base_Column_List" >
     id, account_id, user_id, coins, can_use_coins, coin_code, today_coins, today_income, 
-    total_income, status, count_date, gmt_create, gmt_modify
+    total_income, today_real_income, status, count_date, gmt_create, gmt_modify
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -79,14 +81,14 @@
     </selectKey>
     insert into btc_account_back (account_id, user_id, coins, 
       can_use_coins, coin_code, today_coins, 
-      today_income, total_income, status, 
-      count_date, gmt_create, gmt_modify
-      )
+      today_income, total_income, today_real_income, 
+      status, count_date, gmt_create, 
+      gmt_modify)
     values (#{accountId,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{coins,jdbcType=DECIMAL}, 
       #{canUseCoins,jdbcType=DECIMAL}, #{coinCode,jdbcType=VARCHAR}, #{todayCoins,jdbcType=DECIMAL}, 
-      #{todayIncome,jdbcType=DECIMAL}, #{totalIncome,jdbcType=DECIMAL}, #{status,jdbcType=INTEGER}, 
-      #{countDate,jdbcType=DATE}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModify,jdbcType=TIMESTAMP}
-      )
+      #{todayIncome,jdbcType=DECIMAL}, #{totalIncome,jdbcType=DECIMAL}, #{todayRealIncome,jdbcType=DECIMAL}, 
+      #{status,jdbcType=INTEGER}, #{countDate,jdbcType=DATE}, #{gmtCreate,jdbcType=TIMESTAMP}, 
+      #{gmtModify,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.btc.model.AccountBack" >
     <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
@@ -117,6 +119,9 @@
       </if>
       <if test="totalIncome != null" >
         total_income,
+      </if>
+      <if test="todayRealIncome != null" >
+        today_real_income,
       </if>
       <if test="status != null" >
         status,
@@ -155,6 +160,9 @@
       </if>
       <if test="totalIncome != null" >
         #{totalIncome,jdbcType=DECIMAL},
+      </if>
+      <if test="todayRealIncome != null" >
+        #{todayRealIncome,jdbcType=DECIMAL},
       </if>
       <if test="status != null" >
         #{status,jdbcType=INTEGER},
@@ -197,6 +205,9 @@
       <if test="totalIncome != null" >
         total_income = #{totalIncome,jdbcType=DECIMAL},
       </if>
+      <if test="todayRealIncome != null" >
+        today_real_income = #{todayRealIncome,jdbcType=DECIMAL},
+      </if>
       <if test="status != null" >
         status = #{status,jdbcType=INTEGER},
       </if>
@@ -222,25 +233,26 @@
       today_coins = #{todayCoins,jdbcType=DECIMAL},
       today_income = #{todayIncome,jdbcType=DECIMAL},
       total_income = #{totalIncome,jdbcType=DECIMAL},
+      today_real_income = #{todayRealIncome,jdbcType=DECIMAL},
       status = #{status,jdbcType=INTEGER},
       count_date = #{countDate,jdbcType=DATE},
       gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
       gmt_modify = #{gmtModify,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
-   <insert id="batchInsert" parameterType="java.util.List">
-   	insert into btc_account_back (account_id, user_id, 
-      coins, can_use_coins, coin_code, 
-      today_income, total_income, status, 
-      count_date, gmt_create, gmt_modify
-      )
-    values 
+  <insert id="batchInsert" parameterType="java.util.List">
+   insert into btc_account_back (account_id, user_id, coins, 
+      can_use_coins, coin_code, today_coins, 
+      today_income, total_income, today_real_income, 
+      status, count_date, gmt_create, 
+      gmt_modify)
+    values
    <foreach collection="list" item="item" index="index" separator=",">
-   	( #{item.accountId,jdbcType=BIGINT}, #{item.userId,jdbcType=BIGINT}, 
-      #{item.coins,jdbcType=DECIMAL}, #{item.canUseCoins,jdbcType=DECIMAL}, #{item.coinCode,jdbcType=VARCHAR}, 
-      #{item.todayIncome,jdbcType=DECIMAL}, #{item.totalIncome,jdbcType=DECIMAL}, #{item.status,jdbcType=INTEGER}, 
-      #{item.countDate,jdbcType=DATE}, #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModify,jdbcType=TIMESTAMP}
-      )
+    (#{item.accountId,jdbcType=BIGINT}, #{item.userId,jdbcType=BIGINT}, #{item.coins,jdbcType=DECIMAL}, 
+      #{item.canUseCoins,jdbcType=DECIMAL}, #{item.coinCode,jdbcType=VARCHAR}, #{item.todayCoins,jdbcType=DECIMAL}, 
+      #{item.todayIncome,jdbcType=DECIMAL}, #{item.totalIncome,jdbcType=DECIMAL}, #{item.todayRealIncome,jdbcType=DECIMAL}, 
+      #{item.status,jdbcType=INTEGER}, #{item.countDate,jdbcType=DATE}, #{item.gmtCreate,jdbcType=TIMESTAMP}, 
+      #{item.gmtModify,jdbcType=TIMESTAMP})
      </foreach>
      </insert>
 </mapper>

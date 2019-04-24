@@ -4,29 +4,33 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class UserIncomeRecord {
-	private Long id;
+  private Long id;
 
-	private Long userId;
+    private Long userId;
 
-	private Long accountId;
+    private Long accountId;
 
-	private BigDecimal coins;
+    private BigDecimal coins;
 
-	private BigDecimal coinIncome;
+    private BigDecimal coinIncome;
 
-	private BigDecimal coinDayRate;
+    private BigDecimal coinDayRate;
 
-	private BigDecimal coinYearRate;
+    private BigDecimal coinYearRate;
 
-	private String coinCode;
+    private String coinCode;
 
-	private BigDecimal usdtUnit;
+    private BigDecimal usdtUnit;
 
-	private BigDecimal usdtIncome;
+    private BigDecimal usdtIncome;
 
-	private String bindNo;
+    private Integer isAddIncome;
 
-	private Date gmtCreate;
+    private String bindNo;
+
+    private Date gmtCreate;
+    
+    private Date countDate;
 
 	private String userName;
 
@@ -114,6 +118,14 @@ public class UserIncomeRecord {
 		this.usdtIncome = usdtIncome;
 	}
 
+	public Integer getIsAddIncome() {
+		return isAddIncome;
+	}
+
+	public void setIsAddIncome(Integer isAddIncome) {
+		this.isAddIncome = isAddIncome;
+	}
+
 	public String getBindNo() {
 		return bindNo;
 	}
@@ -128,6 +140,14 @@ public class UserIncomeRecord {
 
 	public void setGmtCreate(Date gmtCreate) {
 		this.gmtCreate = gmtCreate;
+	}
+
+	public Date getCountDate() {
+		return countDate;
+	}
+
+	public void setCountDate(Date countDate) {
+		this.countDate = countDate;
 	}
 
 	public String getUserName() {
@@ -153,7 +173,6 @@ public class UserIncomeRecord {
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
 	}
-	
-	
 
+	
 }

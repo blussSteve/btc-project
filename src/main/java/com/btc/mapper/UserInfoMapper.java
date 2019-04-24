@@ -3,6 +3,8 @@ package com.btc.mapper;
 import java.util.List;
 import java.util.Map;
 
+import net.paoding.rose.web.annotation.Param;
+
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 
@@ -29,4 +31,8 @@ public interface UserInfoMapper {
     @Select("SELECT * FROM btc_user_info t WHERE t.open_id=#{arg0}")
     @ResultMap("BaseResultMap")
     UserInfo getUserInfo(String openId);
+    
+    public List<String> queryInOpenId(List<String> list);
+   
+    public List<UserInfo> queryUserInOpenId(List<String> list);
 }
