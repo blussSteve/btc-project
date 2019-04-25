@@ -35,6 +35,7 @@ import com.btc.global.json.JsonResultHelp;
 import com.btc.global.json.enums.RspCodeEnum;
 import com.btc.global.page.Page;
 import com.btc.global.page.PageUtil;
+import com.btc.mapper.AccountBackMapper;
 import com.btc.mapper.AccountMapper;
 import com.btc.mapper.AssetAddRecordMapper;
 import com.btc.mapper.AssetAddRecordTempMapper;
@@ -85,6 +86,9 @@ public class AssetAddServiceImpl implements AssetAddService{
 	
 	@Autowired
 	private SysCoinsDicMapper sysCoinsDicMapper;
+	
+	@Autowired
+	private AccountBackMapper accountBackMapper;
 	
 	 private static ReentrantLock lock = new ReentrantLock(true);
 	/**
@@ -414,6 +418,7 @@ public class AssetAddServiceImpl implements AssetAddService{
 			if(listHasAccount.size()>0){
 				//更新账户总资产
 				accountMapper.batchUpdateAccountAssetCoins(listHasAccount);
+				accountBackMapper.batchUpdateAccountAssetCoins(listHasAccount);
 			}
 		
 			if(listNoHasAccount.size()>0){

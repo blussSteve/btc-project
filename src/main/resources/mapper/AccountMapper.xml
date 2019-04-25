@@ -216,7 +216,7 @@
   </update>
    <update id="batchUpdateAccountAssetIncome" parameterType="java.util.List">
      <foreach collection="list" item="item" index="index" separator=";">
-     UPDATE btc_account t SET t.coins=t.coins+#{item.todayIncome},t.can_use_coins=#{item.canUseCoins},t.today_income=#{item.todayIncome},t.today_real_income=#{item.todayRealIncome},t.total_income=#{item.totalIncome} WHERE t.id=#{item.id}
+     UPDATE btc_account t SET t.coins=#{item.coins},t.can_use_coins=#{item.canUseCoins},t.today_income=#{item.todayIncome},t.today_real_income=#{item.todayRealIncome},t.total_income=#{item.totalIncome} WHERE t.id=#{item.id}
      </foreach>
   </update>
   <select id="queryAllAsset" resultType="java.util.HashMap">

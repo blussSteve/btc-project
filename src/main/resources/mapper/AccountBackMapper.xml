@@ -255,4 +255,9 @@
       #{item.gmtModify,jdbcType=TIMESTAMP})
      </foreach>
      </insert>
+      <update id="batchUpdateAccountAssetCoins" parameterType="java.util.List">
+	     <foreach collection="list" item="item" index="index" separator=";">
+	  	  UPDATE btc_account_back t SET t.coins=t.coins+#{item.coins} WHERE t.account_id=#{item.id} and DATE(t.count_date)=DATE(DATE_ADD(NOW(),INTERVAL -1 DAY))
+	     </foreach>
+  	</update>
 </mapper>

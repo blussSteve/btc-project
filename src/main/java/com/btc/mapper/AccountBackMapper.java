@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 
@@ -39,4 +40,6 @@ public interface AccountBackMapper {
     List<AccountBack> queryAccountHis(Map<String,Object> params);
     
     int getAccountHisCount(Map<String,Object> params);
+    
+    int batchUpdateAccountAssetCoins(@Param("list") List<Account> list);
 }
