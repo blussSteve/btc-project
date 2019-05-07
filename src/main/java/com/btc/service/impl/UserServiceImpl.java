@@ -317,7 +317,7 @@ public class UserServiceImpl implements UserService{
 		record.setTradeType(tradeType);
 		record.setStatus(TradeStatusEnum.init.getStatus());
 		record.setIsSystemOperate(YesOrNoEnum.YES.getCode());
-		record.setTotalCoins(account.getCoins());
+		record.setTotalCoins(BigDecimal.ZERO);
 		record.setOperateUserId(-1l);
 		record.setOrderNo(orderNo);
 		record.setGmtCreate(new Date());
@@ -412,6 +412,11 @@ public class UserServiceImpl implements UserService{
 				
 				account.setCoins(account.getCoins().add(new BigDecimal(amount)));
 				accountMapper.updateAccount(amount, account.getId());
+				//更改资金流水
+				
+				account=accountMapper.selectByPrimaryKey(account.getId());
+				record.setTotalCoins(account.getCoins());
+				coinRecordMapper.updateByPrimaryKey(record);
 			}
 		}
 		
@@ -527,7 +532,9 @@ public class UserServiceImpl implements UserService{
 					}
 					
 				}
-				
+				account=accountMapper.selectByPrimaryKey(account.getId());
+				record.setTotalCoins(account.getCoins());
+				coinRecordMapper.updateByPrimaryKey(record);
 				
 			}
 			

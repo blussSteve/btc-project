@@ -247,7 +247,9 @@ public class SystemServiceImpl implements SystemService {
 		
 		Date date = new Date();
 		try {
-			date = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr);
+			if(!StringUtils.isEmpty(dateStr)) {
+				date = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr);
+			}
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

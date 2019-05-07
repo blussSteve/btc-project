@@ -36,5 +36,7 @@ public interface AssetService {
 	JsonResult createUserIncomeVerifyHisTemp(int isSystemOperate,
 			long operateId, Date date);
 
+	JsonResult updateUserIncomeIsAdd(int isAdd, String date);
+
 }
  

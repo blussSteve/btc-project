@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.btc.global.json.JsonResult;
 import com.btc.global.page.Page;
 import com.btc.global.page.PageUtil;
 import com.btc.model.CoinRecord;
@@ -41,4 +42,12 @@ public class UserIncomeRecordController {
 		
 		return assetService.queryCoinIncomeRecord(page, record);
 	}
+	
+	@RequestMapping("/updateIsAdd")
+	@ResponseBody
+	public JsonResult updateUserIncomeIsAdd(String date) {
+		
+		return assetService.updateUserIncomeIsAdd(1, date);
+	}
+	
 }

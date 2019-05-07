@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.cache.annotation.Cacheable;
 
 import com.btc.model.UserIncomeRecord;
@@ -79,5 +80,8 @@ public interface UserIncomeRecordMapper {
     @Select("SELECT SUM(t.usdt_income)AS data,DATE_FORMAT(t.count_date,'%Y-%m-%d') AS date FROM btc_user_income_record t WHERE t.user_id=#{arg0} AND DATE(t.count_date)>DATE_ADD(NOW(),INTERVAL #{arg1} DAY) GROUP BY DATE(t.count_date)  ORDER BY t.count_date ASC")
     @Cacheable(value =RedisCacheConstant.REDIS_CACHE_GROUP_S60,keyGenerator=RedisCacheConstant.REDIS_CACHE_GENERATOR_WISELY) 
     List<Map<String,String>> queryUserCoinUsdtIncomeLine(long userId,int day);
+    
+    @Update("UPDATE btc_user_income_record t SET t.`is_add_income`=#{arg0} WHERE DATE(t.`count_date`)=DATE(#{arg1}) ")
+    void updateUserIncomeIsAdd(int isAdd,String date);
     
 }

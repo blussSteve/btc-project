@@ -61,6 +61,9 @@
 			color: white;
 		}
 		
+		#toolbar .form-inline .form-group {
+			padding: 0;
+		}
 		#showImg {
 			text-align: center;
 			padding-top: 10px;
@@ -112,12 +115,21 @@
 				</div>
 			</div>
 			<div class="body-table">
-				<div id="toolbar">
-					<select class="form-control">
-						<option value="all">Export All</option>
-						<option value="basic">Export Basic</option>
-						<option value="selected">Export Selected</option>
-					</select>
+				
+			<div id="toolbar">
+				<form class="form-inline">
+						<div class="form-group">
+							<select class="form-control">
+								<option value="all">Export All</option>
+								<option value="basic">Export Basic</option>
+								<option value="selected">Export Selected</option>
+							</select>
+						</div>
+						<div class="form-group">
+								<input type="text" class="form-control" id="income-date" placeholder="统计日期">
+								<button type="button" id="updateUserIncomeIsAdd" class="btn btn-danger ">修改状态</button>
+							</div>
+					</form>
 				</div>
 				<table id="table"></table>
 			</div>
@@ -125,9 +137,43 @@
 	</body>
 	<script type="text/javascript">
 		$(function() {
-
 			var $table = $("#table"); //初始化bootstrap-table的内容
 			var coins = new Array();
+			$("#updateUserIncomeIsAdd").click(function() {
+				var flag=window.confirm("请仔细检查确认是否修改资收益是否入账")
+				
+				if(flag){
+					var date=$("#income-date").val();
+					if(''==date){
+						alert("日期不能为空");
+						return;
+					}
+						$.ajax({
+						type: 'post',
+						url: '/admin/userIncomeRecord/updateIsAdd',
+						cache: false,
+						dataType: 'json',
+						async: false,
+						data:{date:date},
+						success: function(data) {
+							if("0000" == data.code) {
+								alert("成功")
+								$table.bootstrapTable('refresh');
+							
+							} else {
+								alert(data.msg);
+							}
+	
+						},
+						error: function() {
+							alert("请求失败")
+						}
+					})
+				
+				}
+			});
+
+		
 
 			initSearchDate();
 			initCoinDic();
@@ -394,6 +440,61 @@
 				}, function(start, end, label) {});
 				$('#search-date').on('cancel.daterangepicker', function(ev, picker) {
 					$('#search-date').val('');
+				});
+
+			}
+			
+			initDate();
+			function initDate() {
+
+				$('#income-date').daterangepicker({
+					"singleDatePicker": true,
+					"autoUpdateInput":false,
+					"locale": {
+						"direction": "ltr",
+						"format": "YYYY-MM-DD",
+						"separator": "-",
+						"applyLabel": "确定",
+						"cancelLabel": "清除",
+						"fromLabel": "From",
+						"toLabel": "To",
+						"customRangeLabel": "Custom",
+						"daysOfWeek": [
+								"日",
+								"一",
+								"二",
+								"三",
+								"四",
+								"五",
+								"六"
+						],
+						"monthNames": [
+							"一月",
+							"二月",
+							"三月",
+							"四月",
+							"五月",
+							"六月",
+							"气月",
+							"八月",
+							"九月",
+							"十月",
+							"十一月",
+							"十二月"
+						],
+						"firstDay": 1
+					},
+					"showCustomRangeLabel": false,
+					"alwaysShowCalendars": true,
+					"startDate": new moment().format("YYYY-MM-DD"),
+					"endDate": new moment().format("YYYY-MM-DD"),
+					"maxDate": new moment().format("YYYY-MM-DD"),
+
+				}, function(start, end, label) {});
+				$('#income-date').on('cancel.daterangepicker', function(ev, picker) {
+					$('#income-date').val('');
+				}).on('apply.daterangepicker',function(ev, picker){
+					$('#income-date').val(picker.startDate.format('YYYY-MM-DD'));
 				});
 
 			}

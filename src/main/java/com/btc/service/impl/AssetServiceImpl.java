@@ -189,6 +189,11 @@ public class AssetServiceImpl implements AssetService {
 		 	return page;
 	}
 	
+	@Override
+	public JsonResult updateUserIncomeIsAdd(int isAdd,String date) {
+		userIncomeRecordMapper.updateUserIncomeIsAdd(isAdd, date);
+		return JsonResultHelp.buildSucc();
+	}
 	
 	
 	/**
@@ -1199,7 +1204,7 @@ public class AssetServiceImpl implements AssetService {
 						 account.setTodayIncome(actBack.getTodayIncome());
 						 account.setTotalIncome(actBack.getTotalIncome());
 						 account.setCanUseCoins(actBack.getTodayIncome().add(actBack.getCanUseCoins()));
-						 account.setTodayCoins(account.getCanUseCoins());
+						 account.setTodayCoins(actBack.getCanUseCoins());
 						 account.setCoins(actBack.getCoins().add(actBack.getTodayIncome()));
 						 
 					 }else{
